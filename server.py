@@ -1,11 +1,11 @@
 from flask import Flask
-
+from playsound import playsound
 version = '1.0'
 app = Flask(__name__)
 
 
-@app.route('/version')
-def get_version():
+@app.route('/msg')
+def get_message():
     return 'BoroPDA ' + version
 
 
@@ -16,3 +16,4 @@ def hello_world():
 
 if __name__ == '__main__':
     app.run()
+
