@@ -1,0 +1,5 @@
+arrow~=1.1.0
+SQLAlchemy~=1.4.5
+requests~=2.25.1
+Flask~=1.1.2
+PyQt6~=6.0.2
