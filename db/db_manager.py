@@ -53,6 +53,7 @@ class DBManager:
             message = {
                 'user': msg.user,
                 'message': msg.message,
+                'time': msg.date
             }
             all_messages.append(message)
         self.session.flush()

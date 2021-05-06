@@ -16,11 +16,15 @@ class HttpClient:
         msgs = requests.get(f'{self.base_url}/msgs')
         return msgs.json()
 
+    def last_message_time(self):
+        last_msg_time = requests.get(f'{self.base_url}/is_ex')
+        return last_msg_time
+
 
 if __name__ == '__main__':
     r = HttpClient()
-    # print(r.all_messages())
-    r.send_message('213142', 'Betal')
+    print(r.all_messages())
+    # r.send_message('213142', 'Betal')
 
 
 

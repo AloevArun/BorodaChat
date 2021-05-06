@@ -20,6 +20,11 @@ def all_messages():
     messages = db.read_all()
     return {'messages': messages}
 
+# @app.route('/is_ex')
+# def detect_new_messages():
+#     time = db.read_all()
+#     return
+
 
 # @app.route('/user/<string:name>/msg/<string:text>')
 # def add_message_2(name, text):

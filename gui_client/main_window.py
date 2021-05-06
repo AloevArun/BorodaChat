@@ -1,5 +1,5 @@
 import sys  # sys нужен для передачи argv в QApplication
-
+import arrow
 from PyQt6 import QtWidgets
 
 from client import HttpClient
@@ -17,22 +17,37 @@ class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow):
         self.add_all_messages()
 
     def add_all_messages(self):
-        messages = self.client.all_messages()
-        # for msg in messages:
-        #     self.listWidget(msg)
+        db_messages = self.client.all_messages()
+        unpacked_messages = db_messages['messages']
+        for message in unpacked_messages:
+            print(message)
+            msg = message['message']
+            user = message['user']
+            date = message['time']
+            fmt = 'YYYY-MM-DDTh:m:s.SS'
+            arw = arrow.get(date, fmt).format('HH:mm')
+            self.messageList.addItem(f'| {arw} | {user}: {msg}')
 
     # def send_message(self):
     #     text = self.textEdit.toPlainText()
     #     user = self.textEdit2.toPlainText()
     #     self.client.send_message(text, user)
-    #     self.listWidget.addItem(f'{user}: {text}')
+    #
 
     def send_message(self):
-        text = self.messageLineEdit
-        self.client.send_message(text, 'Betal')
+        if self.userLineEdit.text() == '':
+            pass
+        elif self.messageLineEdit.text() == '':
+            pass
+        else:
+            text = self.messageLineEdit.text()
+            user = self.userLineEdit.text()
+            self.client.send_message(text, user)
+            self.add_message(user, text)
+            self.messageLineEdit.clear()
 
-    def delete_text(self):
-        self.messageLineEdit.clear()
+    def add_message(self, user, message_item):
+        self.messageList.addItem(f'{user}: {message_item}')
 
     def type_message(self):
         print(self.text())

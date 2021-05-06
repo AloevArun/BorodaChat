@@ -10,7 +10,7 @@ class Ui_MainWindow(object):
         self.messageLineEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.messageLineEdit.setGeometry(QtCore.QRect(10, 390, 251, 31))
         self.messageLineEdit.setObjectName("messageLineEdit")
-        self.messageList = QtWidgets.QListView(self.centralwidget)
+        self.messageList = QtWidgets.QListWidget(self.centralwidget)
         self.messageList.setGeometry(QtCore.QRect(10, 70, 331, 311))
         self.messageList.setObjectName("messageList")
         self.sendButton = QtWidgets.QPushButton(self.centralwidget)
