@@ -12,22 +12,20 @@ class HttpClient:
         }
         requests.post(f'{self.base_url}/msg', json=body)
 
-    def all_messages(self):
-        msgs = requests.get(f'{self.base_url}/msgs')
-        return msgs.json()
+    def send_last_message_time(self, time: str):
+        body = {'time': time}
+        new_msgs = requests.post(f'{self.base_url}/whats_new', json=body)
+        return new_msgs
 
-    def last_message_time(self):
-        last_msg_time = requests.get(f'{self.base_url}/is_ex')
-        return last_msg_time
+    def get_all_messages(self):
+        msgs = requests.get(f'{self.base_url}/msgs')
+        return msgs
 
 
 if __name__ == '__main__':
     r = HttpClient()
-    print(r.all_messages())
+    print(r.get_all_messages())
     # r.send_message('213142', 'Betal')
-
-
-
 
 # home_response = requests.get(f'{base_url}/')
 # add_message = requests.post(f'{base_url}/msg', json=body)

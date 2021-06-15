@@ -1,14 +1,12 @@
 from flask import Flask, request
-
 from db.db_manager import DBManager
-
 app = Flask(__name__)
 db = DBManager()
 
 
 @app.route('/msg', methods=['POST'])
 def add_message():
-    body = request.json
+    body = request.get_json()
     user = body['user']
     text = body['text']
     db.add(user, text)
@@ -20,10 +18,13 @@ def all_messages():
     messages = db.read_all()
     return {'messages': messages}
 
-# @app.route('/is_ex')
-# def detect_new_messages():
-#     time = db.read_all()
-#     return
+
+@app.route('/whats_new', methods=['POST'])
+def detect_new_messages():
+    body = request.get_json()
+    time = body['time']
+    messages = db.read_new(time)
+    return {'messages': messages}
 
 
 # @app.route('/user/<string:name>/msg/<string:text>')
@@ -33,24 +34,9 @@ def all_messages():
 #     return name
 
 
-@app.route('/')
-def hello_world():
-    return {'name': 'Runya'}
-
-
-@app.route('/online')
+@app.route('/isonline')
 def online():
     pass
-
-
-@app.route('/offline/<string:user>')
-def offline(user):
-    pass
-
-
-@app.route('/status/<string:user>')
-def status(user):
-    return {'status': 'online'}
 
 
 if __name__ == '__main__':
