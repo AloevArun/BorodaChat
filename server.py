@@ -27,17 +27,16 @@ def detect_new_messages():
     return {'messages': messages}
 
 
+@app.route('/is_online')
+def is_online():
+    return {'status': 'online'}
+
+
+if __name__ == '__main__':
+    app.run()
+
 # @app.route('/user/<string:name>/msg/<string:text>')
 # def add_message_2(name, text):
 #     print(f'Hello, {name} motherfucker!')
 #     print(text)
 #     return name
-
-
-@app.route('/isonline')
-def online():
-    pass
-
-
-if __name__ == '__main__':
-    app.run()

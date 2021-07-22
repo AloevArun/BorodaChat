@@ -1,10 +1,10 @@
-import sys  # sys нужен для передачи argv в QApplication
+import sys
 
 import arrow
 from PyQt6 import QtWidgets
 
 from client import HttpClient
-from gui_client import gui_design  # Это наш конвертированный файл дизайна
+from gui_client import gui_design
 
 
 class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow):
@@ -16,59 +16,63 @@ class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow):
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.client = HttpClient()
         self.sendButton.clicked.connect(self.send_message)
-        self.updateButton.clicked.connect(self.update_messages)
-        self.add_messages(self.get_all_messages())
+        self.updateButton.clicked.connect(self.update_widget)
+        self.add_messages(self.all_db_messages())  # получаем ВСЕ сообщения при запуске
+        # self.check_server_status()
 
-    def get_all_messages(self):
-        messages = self.client.get_all_messages()
+    def all_db_messages(self):  # возвращает ВСЕ сообщения из базы
+        messages = self.client.get_all_messages()['messages']
         print(messages)
-        return messages.json()
+        return messages
 
-    def update_messages(self):
-        if self.messageList.count() != 0:
-            time = self.messageList.currentItem()[2:23]
-            print(time)
-            messages = self.client.send_last_message_time(time)
-        else:
-            messages = self.get_all_messages()
-        return messages.json()
+    def update_widget(self):
+        time = self.messageList.item(self.messageList.count() - 1).text()
+        print(time)
+        messages = self.client.update_messages(time)['messages']
+        if len(messages) != 0:
+            self.add_messages(messages)
+            return messages
 
-    def add_messages(self, all_messages):
-        self.messageList.clear()
-        messages = all_messages['messages']
-        for message in messages:
-            if message not in self.messageList.selectedItems():
-                print(message)
-                msg = message['message']
-                user = message['user']
-                date = message['time']
-                fmt = 'YYYY-MM-DDTh:m:s.SS'
-                arw = arrow.get(date, fmt).format(fmt)
-                self.messageList.addItem(f'| {arw} | {user}: {msg}')
+    def add_messages(self, messages_to_add: dict) -> None:
+        if messages_to_add != 0:
+            for message in messages_to_add:
+                if message not in self.messageList.selectedItems():
+                    self.add_message_to_widget(message)
+
         self.messageList.scrollToBottom()
 
-    #    def send_message(self):
-    #        text = self.textEdit.toPlainText()
-    #        user = self.textEdit2.toPlainText()
-    #        self.client.send_message(text, user)
+    # добавление ВСЕХ требуемых сообщений из 'messages_to_add'
 
-    def send_message(self):
-        if self.userLineEdit.text() != '' or self.messageLineEdit.text() != '':
-            text = self.messageLineEdit.text()
-            user = self.userLineEdit.text()
-            self.client.send_message(text, user)
-            self.messageLineEdit.clear()
-            self.update_messages()
+    def add_message_to_widget(self, message: dict) -> None:
+        msg = message['message']
+        user = message['user']
+        date = message['time']
+        fmt = 'YYYY-MM-DDTh:m:s.SS'
+        arw = arrow.get(date, fmt).format(fmt)
+        self.messageList.addItem(f'| {arw} | {user}: {msg}')
 
-#    def add_message(self, user, message_item):
-#        self.messageList.addItem(f'{user}: {message_item}')
+    # добавление одного(!) сообщения
 
-#    def type_message(self):
-#        print(self.text())
+    def send_message(self) -> None:
+        if self.userLineEdit.text() != '' and self.messageLineEdit.text() != '':  # если поля не пустые
+            text = self.messageLineEdit.text()  # текст сообщения
+            user = self.userLineEdit.text()  # имя пользователя
+            self.client.send_message(text, user)  # отправляем имя пользователя, сообщение и время
+            self.update_widget()  # обновляем сообщения с сервера
+            self.messageLineEdit.clear()  # очищаем поле ввода сообщения ('messageLineEdit')
+            self.check_server_status()
+
+    # отправляем сообщение и обновляем сообщения с сервера
+    # !!!убрать 'update_messages()' и 'check_server_status()' после реализации автоматического обновления
+    def check_server_status(self):
+        status = self.client.check_server()
+        if status['status'] == 'online':
+            self.onlineLabel.setText('Online')
+            self.onlineLabel.update()
 
 
 if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
-    app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
-    window = MainWindow()  # Создаём объект класса ExampleApp
-    window.show()  # Показываем окно
-    app.exec()  # и запускаем приложение
+    app = QtWidgets.QApplication(sys.argv)  # новый экземпляр QApplication
+    window = MainWindow()  # создаём объект класса ExampleApp
+    window.show()  # запускаем интерфейс
+    app.exec()  # запускаем движок

@@ -1,6 +1,6 @@
 import os
+
 import arrow
-import json
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -39,9 +39,7 @@ class DBManager:
         msg = Message(_id=_id, user=user, message=text, date=date)
         self.session.add(msg)
         self.session.commit()
-
-    def delete(self, _id: int):
-        pass
+        self.session.flush()
 
     def read_all(self):
         all_messages = []
@@ -65,10 +63,9 @@ class DBManager:
             }
 
             fmt = 'YYYY-MM-DDTh:m:s.SS'
-            intfmt = 'YYYMMDDhmsSS'
-            message_time = arrow.get(message['time'], fmt).format(intfmt)
-            current_message_time = arrow.get(time, fmt).format(intfmt)
-            if message_time > current_message_time:
+            client_message_time = arrow.get(message['time'], fmt)
+            last_db_message_time = arrow.get(time, fmt)
+            if client_message_time > last_db_message_time:
                 new_messages.append(message)
         self.session.flush()
         print(new_messages)
