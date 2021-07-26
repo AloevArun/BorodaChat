@@ -68,5 +68,4 @@ class DBManager:
             if client_message_time > last_db_message_time:
                 new_messages.append(message)
         self.session.flush()
-        print(new_messages)
         return new_messages

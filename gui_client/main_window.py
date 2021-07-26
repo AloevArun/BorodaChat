@@ -22,12 +22,10 @@ class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow):
 
     def all_db_messages(self):  # возвращает ВСЕ сообщения из базы
         messages = self.client.get_all_messages()['messages']
-        print(messages)
         return messages
 
     def update_widget(self):
         time = self.messageList.item(self.messageList.count() - 1).text()
-        print(time)
         messages = self.client.update_messages(time)['messages']
         if len(messages) != 0:
             self.add_messages(messages)
