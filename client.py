@@ -29,10 +29,6 @@ class HttpClient:
 if __name__ == '__main__':
     r = HttpClient()
     print(r.get_all_messages())
-    # r.send_message('213142', 'Betal')
 
-# home_response = requests.get(f'{base_url}/')
-# add_message = requests.post(f'{base_url}/msg', json=body)
-# hello_params = requests.post(f'{base_url}/user/runya/msg/trah')
 
 #

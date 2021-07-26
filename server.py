@@ -35,8 +35,3 @@ def is_online():
 if __name__ == '__main__':
     app.run()
 
-# @app.route('/user/<string:name>/msg/<string:text>')
-# def add_message_2(name, text):
-#     print(f'Hello, {name} motherfucker!')
-#     print(text)
-#     return name
