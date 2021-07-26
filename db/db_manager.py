@@ -49,13 +49,10 @@ class DBManager:
         return auth_status
 
     def user_exists(self, user: str):
-        user_exists = False
-        for users in self.session.query(User).all():
-            usr = {'user': users.user}
-            if user == usr:
-                user_exists = True
-            else:
-                user_exists = False
+        if self.session.query(User).filter_by(user=user).first():
+            user_exists = True
+        else:
+            user_exists = False
         return user_exists
 
     def add_new_user(self, user: str, password: str):
@@ -68,12 +65,6 @@ class DBManager:
             return True
         else:
             return False
-
-    def delete_user(self, user: str):
-        user_ = self.session.query(User).filter_by(user=user).first()
-        self.session.delete(user_)
-        self.session.commit()
-        self.session.flush()
 
     def add_new_message(self, user: str, text: str):
         _id = len(self.session.query(Message).all()) + 1
@@ -111,3 +102,9 @@ class DBManager:
                 new_messages.append(message)
         self.session.flush()
         return new_messages
+
+#    def delete_user(self, user: str):
+#        user_ = self.session.query(User).filter_by(user=user).first()
+#        self.session.delete(user_)
+#        self.session.commit()
+#        self.session.flush()

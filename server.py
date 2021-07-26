@@ -29,16 +29,11 @@ def register():
     body = request.get_json()
     user = body['user']
     password = body['password']
-    db.add_new_user(user, password)
-    return body
-
-
-@app.route('/delete_user', methods=['POST'])
-def delete_user():
-    body = request.get_json()
-    user = body['user']
-    db.delete_user(user)
-    return body
+    status = db.add_new_user(user, password)
+    if not status:
+        return 'User already exists!'
+    else:
+        return 'Done!'
 
 
 @app.route('/msgs')
@@ -62,3 +57,10 @@ def is_online():
 
 if __name__ == '__main__':
     app.run()
+
+# @app.route('/delete_user', methods=['POST'])
+# def delete_user():
+#     body = request.get_json()
+#     user = body['user']
+#     db.delete_user(user)
+#     return body
