@@ -4,7 +4,7 @@ import arrow
 from PyQt6 import QtWidgets
 
 from client import HttpClient
-from gui_client import gui_design
+from client.gui_client import gui_design
 
 
 class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow):
