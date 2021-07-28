@@ -4,8 +4,8 @@ import uuid
 import arrow
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from .tables import User, MessageTable, Base
 
+from .tables import User, MessageTable, Base
 
 
 class DBManager:
@@ -24,21 +24,6 @@ class DBManager:
 
         self.session = sessionmaker(bind=self.engine)()
 
-    # def create_new_dialog_table(self, creator: str, guest: str):
-    #     new_table_name = f'{creator}_{guest}'
-    #     if new_table_name not in inspector.get_table_names():
-    #         ConvMsg.__tablename__ = new_table_name
-    #         Table(new_table_name, Base.metadata,
-    #               Column('_id', Text, primary_key=True),
-    #               Column('user', String(250), nullable=False),
-    #               Column('message', Text, nullable=False),
-    #               Column('date', Text, nullable=False))
-    #
-    #         Base.metadata.create_all(engine)
-    #         self.add_new_message(creator, '- создал', new_table_name)
-    #         return 'Dialog Created'
-    #     else:
-    #         return 'This dialog already exists'
 
     def authentification(self, user: str, password: str):
         user = self.session.query(User).filter_by(user=user).one()
@@ -108,8 +93,4 @@ class DBManager:
         self.session.flush()
         return new_messages
 
-#    def delete_user(self, user: str):
-#        user_ = self.session.query(User).filter_by(user=user).first()
-#        self.session.delete(user_)
-#        self.session.commit()
-#        self.session.flush()
+
