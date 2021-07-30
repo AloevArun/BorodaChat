@@ -7,8 +7,12 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
     user_id = Column(Text, nullable=False)
-    user = Column(String(250), primary_key=True, nullable=False)
+    nickname = Column(String(250), primary_key=True, nullable=False)
+    email = Column(Text, nullable=False)
     password = Column(Text, nullable=False)
+    phone = Column(Text, nullable=True)
+    about = Column(Text, nullable=True)
+    registration_date = Column(Text, nullable=False)
 
 
 class MessageTable(Base):

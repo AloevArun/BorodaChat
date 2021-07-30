@@ -27,3 +27,10 @@
 #     user = body['user']
 #     db.delete_user(user)
 #     return body
+
+
+def resize_window(self):
+    if self.auth_tab.isActiveWindow():
+        AuthWindow.resize(370, 740)
+    elif self.regist_tab.isActiveWindow():
+        AuthWindow.resize(370, 380)

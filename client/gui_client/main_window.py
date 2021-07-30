@@ -3,11 +3,11 @@ import sys
 import arrow
 from PyQt6 import QtWidgets
 
-from client import HttpClient
-from client.gui_client import gui_design
+from client.client import HttpClient
+from client.gui_client import gui_design, gui_authentification
 
 
-class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow):
+class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow, gui_authentification.Ui_AuthWindow):
 
     def __init__(self):
         # Это здесь нужно для доступа к переменным, методам
@@ -18,6 +18,8 @@ class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow):
         self.sendButton.clicked.connect(self.send_message)
         self.updateButton.clicked.connect(self.update_widget)
         self.add_messages(self.all_db_messages())  # получаем ВСЕ сообщения при запуске
+        self.AuthTabWidget.tabBarClicked(1).connect(gui_authentification)
+        self.AuthTabWidget.tabBarClicked(2).connect()
         # self.check_server_status()
 
     def all_db_messages(self):  # возвращает ВСЕ сообщения из базы

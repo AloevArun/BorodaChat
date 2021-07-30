@@ -24,7 +24,6 @@ class DBManager:
 
         self.session = sessionmaker(bind=self.engine)()
 
-
     def authentification(self, user: str, password: str):
         user = self.session.query(User).filter_by(user=user).one()
         if user['password'] == password:
@@ -34,11 +33,13 @@ class DBManager:
         return auth_status
 
     def user_exists(self, user: str):
-        return self.session.query(User).filter_by(user=user).first()
+        return self.session.query(User).filter_by(nickname=user).first()
 
-    def add_new_user(self, user: str, password: str):
-        if not self.user_exists(user):
-            user = User(user_id=uuid.uuid4().hex, user=user, password=password)
+    def add_new_user(self, nickname: str, email: str, password: str, phone='', about=''):
+        if not self.user_exists(nickname):
+            date = arrow.now().format('YYYY-MM-DDTh:m:s.SS')
+            user = User(user_id=uuid.uuid4().hex, nickname=nickname, email=email, password=password,
+                        phone=phone, about=about, registration_date=date)
             self.session.add(user)
             self.save_to_db()
             return 'User added'
@@ -92,5 +93,3 @@ class DBManager:
                 new_messages.append(message)
         self.session.flush()
         return new_messages
-
-

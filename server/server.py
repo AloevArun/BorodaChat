@@ -35,11 +35,15 @@ def login():
 
 
 @app.route('/registration', methods=['POST'])
-def register():
+def registration():
     body = request.get_json()
-    user = body['user']
+    nickname = body['nickname']
+    email = body['email']
     password = body['password']
-    response = db.add_new_user(user, password)
+    phone = body['phone']
+    about = body['about']
+    user_data = (nickname, email, password, phone, about)
+    response = db.add_new_user(*user_data)
     return response
 
 

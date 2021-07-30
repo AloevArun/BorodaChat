@@ -1,73 +1,6 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(349, 456)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.messageLineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.messageLineEdit.setGeometry(QtCore.QRect(10, 390, 251, 31))
-        self.messageLineEdit.setObjectName("messageLineEdit")
-        self.messageList = QtWidgets.QListWidget(self.centralwidget)
-        self.messageList.setGeometry(QtCore.QRect(10, 70, 331, 311))
-        self.messageList.setObjectName("messageList")
-        self.sendButton = QtWidgets.QPushButton(self.centralwidget)
-        self.sendButton.setGeometry(QtCore.QRect(270, 390, 75, 31))
-        self.sendButton.setObjectName("sendButton")
-        self.userLineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.userLineEdit.setGeometry(QtCore.QRect(10, 30, 221, 31))
-        self.userLineEdit.setObjectName("userLineEdit")
-        self.updateButton = QtWidgets.QPushButton(self.centralwidget)
-        self.updateButton.setGeometry(QtCore.QRect(240, 30, 101, 31))
-        self.updateButton.setObjectName("updateButton")
-        self.statusLabel = QtWidgets.QLabel(self.centralwidget)
-        self.statusLabel.setGeometry(QtCore.QRect(10, 430, 61, 21))
-        font = QtGui.QFont()
-        font.setFamily("Trebuchet MS")
-        font.setPointSize(12)
-        self.statusLabel.setFont(font)
-        self.statusLabel.setObjectName("statusLabel")
-        self.onlineLabel = QtWidgets.QLabel(self.centralwidget)
-        self.onlineLabel.setGeometry(QtCore.QRect(60, 430, 61, 21))
-        font = QtGui.QFont()
-        font.setFamily("Trebuchet MS")
-        font.setPointSize(12)
-        font.setBold(False)
-        font.setItalic(True)
-        self.onlineLabel.setFont(font)
-        self.onlineLabel.setObjectName("onlineLabel")
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(10, 10, 81, 21))
-        font = QtGui.QFont()
-        font.setFamily("Trebuchet MS")
-        font.setPointSize(12)
-        self.label.setFont(font)
-        self.label.setObjectName("label")
-        self.statusLabel.raise_()
-        self.messageLineEdit.raise_()
-        self.messageList.raise_()
-        self.sendButton.raise_()
-        self.userLineEdit.raise_()
-        self.updateButton.raise_()
-        self.onlineLabel.raise_()
-        self.label.raise_()
-        MainWindow.setCentralWidget(self.centralwidget)
-
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Corporative Chat 1.0"))
-        self.sendButton.setText(_translate("MainWindow", "Send"))
-        self.updateButton.setText(_translate("MainWindow", "Update"))
-        self.statusLabel.setText(_translate("MainWindow", "Status:"))
-        self.onlineLabel.setText(_translate("MainWindow", "Offline"))
-        self.label.setText(_translate("MainWindow", "Username:"))
-
-
 class Ui_AuthWindow(QtWidgets.QMainWindow):
     def setupUi(self, AuthWindow):
         AuthWindow.setObjectName("AuthWindow")
@@ -230,6 +163,7 @@ class Ui_AuthWindow(QtWidgets.QMainWindow):
         self.PingButton.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
         self.PingButton.setObjectName("PingButton")
         AuthWindow.setCentralWidget(self.centralwidget)
+
         self.retranslateUi(AuthWindow)
         self.AuthTabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(AuthWindow)
@@ -257,3 +191,4 @@ class Ui_AuthWindow(QtWidgets.QMainWindow):
         self.PortTextEdit.setPlainText(_translate("AuthWindow", "5000"))
         self.label_5.setText(_translate("AuthWindow", "Port:"))
         self.PingButton.setText(_translate("AuthWindow", "Проверить соединение с сервером"))
+
