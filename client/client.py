@@ -25,6 +25,10 @@ class HttpClient:
         status = requests.get(f'{self.base_url}/is_online')
         return status.json()
 
+    def registration(self, body: dict):
+        response = requests.post('', json=body)
+        return response.json()
+
 
 if __name__ == '__main__':
     r = HttpClient()

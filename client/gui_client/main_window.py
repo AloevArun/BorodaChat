@@ -2,25 +2,68 @@ import sys
 
 import arrow
 from PyQt6 import QtWidgets
+from PyQt6.QtWidgets import QDialog, QMessageBox
 
 from client.client import HttpClient
-from client.gui_client import gui_design, gui_authentification
+from client.gui_client.gui_authentification import Ui_Dialog
+from client.gui_client.gui_design import Ui_MainWindow
 
 
-class MainWindow(QtWidgets.QMainWindow, gui_design.Ui_MainWindow, gui_authentification.Ui_AuthWindow):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def __init__(self):
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле gui_design.py
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+
+        self.dialog = QDialog()
+        self.dialog.ui = Ui_Dialog()
+        self.dialog.ui.setupUi(self.dialog)
+
+        self.auth_window = self.dialog.ui
+
+        self.auth_window.RegistButton_2.clicked.connect(self.registration)
+        self.auth_window.LoginButton_2.clicked.connect(self.login)
+
         self.client = HttpClient()
-        self.sendButton.clicked.connect(self.send_message)
-        self.updateButton.clicked.connect(self.update_widget)
-        self.add_messages(self.all_db_messages())  # получаем ВСЕ сообщения при запуске
-        self.AuthTabWidget.tabBarClicked(1).connect(gui_authentification)
-        self.AuthTabWidget.tabBarClicked(2).connect()
+        # self.sendButton.clicked.connect(self.send_message)
+        # self.updateButton.clicked.connect(self.update_widget)
+        # self.add_messages(self.all_db_messages())  # получаем ВСЕ сообщения при запуске
         # self.check_server_status()
+
+        self.user_nick = None
+
+        self.dialog.exec()
+
+    def registration(self):
+        registration_body = {
+            "nick": self.auth_window.RegistTextEdit_2.toPlainText(),
+            "login": self.auth_window.RegistEmailTextEdit_2.toPlainText(),
+            "password": self.auth_window.RegistPasswordTextEdit_2.toPlainText(),
+        }
+
+        # assert '' not in registration_body.values(), f'Some fields is empty. {registration_body.values()}'
+
+        self.client.registration(registration_body)
+        self.auth_window.RegistButton_2.setEnabled(False)
+        self.auth_window.RegistButton_2.setText("Регистрация завершена")
+
+    def login(self):
+        login_body = {
+            "login": self.auth_window.LoginTextEdit_2.toPlainText(),
+            "password": self.auth_window.PasswordTextEdit_2.toPlainText(),
+        }
+        # assert '' not in login_body.values(), f'Some fields is empty. {login_body.values()}'
+
+        user_data = self.client.login(login_body)
+        if not user_data:
+            QMessageBox(f'Access denied. Unknown login/password')
+            return
+
+        self.user_nick = user_data['nick']
+        self.dialog.accept()
+        self.UserLabel.setText(self.user_nick)
 
     def all_db_messages(self):  # возвращает ВСЕ сообщения из базы
         messages = self.client.get_all_messages()['messages']

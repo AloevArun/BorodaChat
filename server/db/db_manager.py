@@ -26,11 +26,7 @@ class DBManager:
 
     def authentification(self, user: str, password: str):
         user = self.session.query(User).filter_by(user=user).one()
-        if user['password'] == password:
-            auth_status = 'granted'
-        else:
-            auth_status = 'denied'
-        return auth_status
+        return 'granted' if user['password'] == password else 'denied'
 
     def user_exists(self, user: str):
         return self.session.query(User).filter_by(nickname=user).first()
