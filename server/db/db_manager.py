@@ -32,7 +32,7 @@ class DBManager:
 
     def user_exists(self, user_name: str):
         try:
-            result = self.session.query(User).filter_by(login=user_name).one()
+            result = self.session.query(User).filter_by(nickname=user_name).one()
         except NoResultFound as ex:
             return None
         else:
@@ -88,18 +88,21 @@ class DBManager:
 
     def read_new_messages(self, time: str):
         new_messages = []
-        for msg in self.session.query(MessageTable).all():
-            message = {
-                'sender': msg.sender,
-                'receiver': msg.receiver,
-                'message': msg.message,
-                'time': msg.date
-            }
+        all_messages = self.session.query(MessageTable).all()
+        if len(all_messages) != 0:
+            for msg in all_messages:
+                message = {
+                    'sender': msg.sender,
+                    'receiver': msg.receiver,
+                    'message': msg.message,
+                    'time': msg.date
+                }
 
-            fmt = 'YYYY-MM-DDTh:m:s.SS'
-            client_message_time = arrow.get(message['time'], fmt)
-            last_db_message_time = arrow.get(time, fmt)
-            if client_message_time > last_db_message_time:
-                new_messages.append(message)
-        self.session.flush()
+                fmt = 'YYYY-MM-DDTh:m:s.SS'
+                client_message_time = arrow.get(message['time'], fmt)
+                last_db_message_time = arrow.get(time, fmt)
+                if client_message_time > last_db_message_time:
+                    new_messages.append(message)
+            self.session.flush()
+
         return new_messages

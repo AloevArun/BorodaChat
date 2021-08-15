@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, url_for
+from flask import Flask, request
 from db.db_manager import DBManager
 
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.curdir), "instance"))
@@ -54,25 +54,11 @@ def registration():
     return response
 
 
-def has_no_empty_params(rule):
-    defaults = rule.defaults if rule.defaults is not None else ()
-    arguments = rule.arguments if rule.arguments is not None else ()
-    return len(defaults) >= len(arguments)
-
-
 @app.route('/msgs')
 def all_messages():
-    links = []
-    for rule in app.url_map.iter_rules():
-        # Filter out rules we can't navigate to in a browser
-        # and rules that require parameters
-        if "GET" in rule.methods and has_no_empty_params(rule):
-            url = url_for(rule.endpoint, **(rule.defaults or {}))
-            links.append((url, rule.endpoint))
-
-    # messages = db.read_all_messages()
-    # response = {'messages': messages}
-    # return response
+    messages = db.read_all_messages()
+    response = {'messages': messages}
+    return response
 
 
 @app.route('/messages', methods=['POST'])
@@ -80,27 +66,33 @@ def get_user_messages():
     body = request.get_json()
     user = body['user']
     password = body['password']
+
     if db.authentication(user, password):
         messages = db.read_all_messages()
-        user_messages = pack_data(user, messages)
-        return user_messages
+        if len(messages) != 0:
+            user_messages = pack_data(user, messages)
+            return user_messages
+        else:
+            return {"response": "no_updates"}
     else:
-        user_messages = {"response": "denied"}
-    return user_messages
+        return {"response": "non_authorized"}
 
 
 @app.route('/whats_new', methods=['POST'])
-def detect_new_messages(user):
+def detect_new_messages():
     body = request.get_json()
     time = body['time']
     user = body['user']
     password = body['password']
     if db.authentication(user, password):
         messages = db.read_new_messages(time)
-        user_messages = pack_data(user, messages)
-        return user_messages
+        if len(messages) != 0:
+            user_messages = pack_data(user, messages)
+            return user_messages
+        else:
+            return {"response": "no_updates"}
     else:
-        return {"response": "denied"}
+        return {"response": "non_authorized"}
 
 
 @app.route('/is_online')
