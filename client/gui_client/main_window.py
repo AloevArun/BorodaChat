@@ -1,5 +1,5 @@
 import sys
-
+from hashlib import sha256
 import arrow
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QDialog, QMessageBox
@@ -23,45 +23,49 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.auth_window = self.dialog.ui
 
-        self.auth_window.RegistButton_2.clicked.connect(self.registration)
-        self.auth_window.LoginButton_2.clicked.connect(self.login)
+        self.auth_window.RegistButton.clicked.connect(self.registration)
+        self.auth_window.LoginButton.clicked.connect(self.login)
+        self.auth_window.PingButton.clicked.connect(self.check_server_status)
 
-        self.client = HttpClient()
         # self.sendButton.clicked.connect(self.send_message)
         # self.updateButton.clicked.connect(self.update_widget)
         # self.add_messages(self.all_db_messages())  # получаем ВСЕ сообщения при запуске
         # self.check_server_status()
-
+        self.client = HttpClient()
         self.user_nick = None
-
+        self.msgbox = QMessageBox()
         self.dialog.exec()
+        self.dialog.rejected.connect(sys.exit(0))
 
     def registration(self):
         registration_body = {
-            "nick": self.auth_window.RegistTextEdit_2.toPlainText(),
-            "login": self.auth_window.RegistEmailTextEdit_2.toPlainText(),
-            "password": self.auth_window.RegistPasswordTextEdit_2.toPlainText(),
+            "nickname": self.auth_window.RegistTextEdit.toPlainText(),
+            "login": self.auth_window.RegistEmailTextEdit.toPlainText(),
+            "password": str(sha256(self.auth_window.RegistPasswordTextEdit.toPlainText().encode('utf-8')).hexdigest())
         }
 
-        # assert '' not in registration_body.values(), f'Some fields is empty. {registration_body.values()}'
+        assert '' not in registration_body.values(), f'Some fields is empty. {registration_body.values()}'
 
         self.client.registration(registration_body)
-        self.auth_window.RegistButton_2.setEnabled(False)
-        self.auth_window.RegistButton_2.setText("Регистрация завершена")
+        self.auth_window.RegistButton.setEnabled(False)
+        self.auth_window.RegistButton.setText("Регистрация завершена")
 
     def login(self):
-        login_body = {
-            "login": self.auth_window.LoginTextEdit_2.toPlainText(),
-            "password": self.auth_window.PasswordTextEdit_2.toPlainText(),
+        credentials = {
+            "user_name": self.auth_window.LoginTextEdit.toPlainText(),
+            "password": self.auth_window.PasswordTextEdit.toPlainText(),
         }
-        # assert '' not in login_body.values(), f'Some fields is empty. {login_body.values()}'
+        assert '' not in credentials.values(), f'Some fields is empty. {credentials.values()}'
 
-        user_data = self.client.login(login_body)
-        if not user_data:
-            QMessageBox(f'Access denied. Unknown login/password')
+        response = self.client.login(credentials).json()
+        self.user_nick = response.get('nickname')
+
+        if not self.user_nick:
+            self.msgbox.setWindowTitle('Сервер')
+            self.msgbox.setText("Неверный логин/пароль!")
+            self.msgbox.exec()
             return
 
-        self.user_nick = user_data['nick']
         self.dialog.accept()
         self.UserLabel.setText(self.user_nick)
 
@@ -99,8 +103,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def send_message(self) -> None:
         if self.userLineEdit.text() != '' and self.messageLineEdit.text() != '':  # если поля не пустые
             text = self.messageLineEdit.text()  # текст сообщения
-            user = self.userLineEdit.text()  # имя пользователя
-            self.client.send_message(text, user)  # отправляем имя пользователя, сообщение и время
+            self.client.send_message(text, self.user_nick)  # отправляем имя пользователя, сообщение и время
             self.update_widget()  # обновляем сообщения с сервера
             self.messageLineEdit.clear()  # очищаем поле ввода сообщения ('messageLineEdit')
             self.check_server_status()
@@ -108,10 +111,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # отправляем сообщение и обновляем сообщения с сервера
     # !!!убрать 'update_messages()' и 'check_server_status()' после реализации автоматического обновления
     def check_server_status(self):
-        status = self.client.check_server()
-        if status['status'] == 'online':
-            self.onlineLabel.setText('Online')
-            self.onlineLabel.update()
+        host = {
+            "ip": self.auth_window.IPTextEdit.toPlainText(),
+            "port": self.auth_window.PortTextEdit.toPlainText()
+        }
+        try:
+            self.client.base_url = f'http://{host["ip"]}:{host["port"]}'
+            if self.client.check_server()["status"] == 'online':
+                self.msgbox.setWindowTitle('Сервер')
+                self.msgbox.setText('Соединение с сервером установлено!')
+                self.msgbox.exec()
+        except:
+            self.msgbox.setText('Сервер недоступен, проверьте введенный адрес.')
+            self.msgbox.exec()
 
 
 if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем

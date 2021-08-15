@@ -40,7 +40,7 @@
     <enum>Qt::ScrollBarAlwaysOff</enum>
    </property>
    <property name="plainText">
-    <string>255.255.255.255</string>
+    <string>127.0.0.1</string>
    </property>
    <property name="placeholderText">
     <string/>
@@ -93,7 +93,7 @@
     <string>Проверить соединение с сервером</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="mainlabel">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -111,7 +111,7 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; color:#55557f;&quot;&gt;Corporative Chat&lt;/span&gt;&lt;span style=&quot; color:#55557f; vertical-align:super;&quot;&gt;1.0 &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_4">
+  <widget class="QLabel" name="iplabel">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -132,7 +132,7 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_5">
+  <widget class="QLabel" name="portlabel">
    <property name="geometry">
     <rect>
      <x>186</x>
@@ -189,13 +189,13 @@
     </font>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
-   <widget class="QWidget" name="auth_tab_2">
+   <widget class="QWidget" name="auth_tab">
     <attribute name="title">
      <string>Вход</string>
     </attribute>
-    <widget class="QLabel" name="label_9">
+    <widget class="QLabel" name="loginlabel">
      <property name="geometry">
       <rect>
        <x>12</x>
@@ -211,7 +211,7 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QPlainTextEdit" name="LoginTextEdit_2">
+    <widget class="QPlainTextEdit" name="LoginTextEdit">
      <property name="geometry">
       <rect>
        <x>76</x>
@@ -227,7 +227,7 @@
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
     </widget>
-    <widget class="QLabel" name="label_10">
+    <widget class="QLabel" name="passwordlabel">
      <property name="geometry">
       <rect>
        <x>11</x>
@@ -243,7 +243,7 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QPlainTextEdit" name="PasswordTextEdit_2">
+    <widget class="QPlainTextEdit" name="PasswordTextEdit">
      <property name="geometry">
       <rect>
        <x>76</x>
@@ -259,7 +259,7 @@
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
     </widget>
-    <widget class="QPushButton" name="LoginButton_2">
+    <widget class="QPushButton" name="LoginButton">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -276,11 +276,11 @@
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="regist_tab_2">
+   <widget class="QWidget" name="regist_tab">
     <attribute name="title">
      <string>Регистрация</string>
     </attribute>
-    <widget class="QPlainTextEdit" name="RegistTextEdit_2">
+    <widget class="QPlainTextEdit" name="RegistTextEdit">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -296,7 +296,7 @@
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
     </widget>
-    <widget class="QLabel" name="label_11">
+    <widget class="QLabel" name="nicknamelabel">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -309,7 +309,7 @@
       <string>Введите ник в чате:</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_12">
+    <widget class="QLabel" name="emaillabel">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -322,7 +322,7 @@
       <string>Введите Email/Логин:</string>
      </property>
     </widget>
-    <widget class="QPlainTextEdit" name="RegistEmailTextEdit_2">
+    <widget class="QPlainTextEdit" name="RegistEmailTextEdit">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -338,7 +338,7 @@
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
     </widget>
-    <widget class="QLabel" name="label_13">
+    <widget class="QLabel" name="registpasswordlabel">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -351,7 +351,7 @@
       <string>Введите пароль:</string>
      </property>
     </widget>
-    <widget class="QPlainTextEdit" name="RegistPasswordTextEdit_2">
+    <widget class="QPlainTextEdit" name="RegistPasswordTextEdit">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -367,7 +367,7 @@
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
     </widget>
-    <widget class="QPushButton" name="RegistButton_2">
+    <widget class="QPushButton" name="RegistButton">
      <property name="geometry">
       <rect>
        <x>20</x>

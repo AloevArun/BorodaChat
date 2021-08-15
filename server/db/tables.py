@@ -8,9 +8,9 @@ class User(Base):
     __tablename__ = 'users'
     user_id = Column(Text, nullable=False)
     nickname = Column(String(250), primary_key=True, nullable=False)
-    email = Column(Text, nullable=False)
+    login = Column(Text, nullable=False)
     password = Column(Text, nullable=False)
-
+    registration_date = Column(Text, nullable=False)
 
 
 class MessageTable(Base):

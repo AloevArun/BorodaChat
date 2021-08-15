@@ -26,13 +26,14 @@ class HttpClient:
         return status.json()
 
     def registration(self, body: dict):
-        response = requests.post('', json=body)
-        return response.json()
+        response = requests.post(f'{self.base_url}/registration', json=body)
+        return response
+
+    def login(self, body: dict):
+        response = requests.post(f'{self.base_url}/login', json=body)
+        return response
 
 
 if __name__ == '__main__':
     r = HttpClient()
     print(r.get_all_messages())
-
-
-#

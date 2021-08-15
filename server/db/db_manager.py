@@ -3,6 +3,7 @@ import uuid
 
 import arrow
 from sqlalchemy import create_engine
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import sessionmaker
 
 from .tables import User, MessageTable, Base
@@ -24,23 +25,35 @@ class DBManager:
 
         self.session = sessionmaker(bind=self.engine)()
 
-    def authentification(self, user: str, password: str):
-        user = self.session.query(User).filter_by(user=user).one()
-        return 'granted' if user['password'] == password else 'denied'
+    def authentication(self, user_name: str, password: str):
+        user = self.user_exists(user_name)
+        if user and user.password == password:
+            return {'nickname': user.nickname}
 
-    def user_exists(self, user: str):
-        return self.session.query(User).filter_by(nickname=user).first()
-
-    def add_new_user(self, nickname: str, email: str, password: str, phone='', about=''):
-        if not self.user_exists(nickname):
-            date = arrow.now().format('YYYY-MM-DDTh:m:s.SS')
-            user = User(user_id=uuid.uuid4().hex, nickname=nickname, email=email, password=password,
-                        phone=phone, about=about, registration_date=date)
-            self.session.add(user)
-            self.save_to_db()
-            return 'User added'
+    def user_exists(self, user_name: str):
+        try:
+            result = self.session.query(User).filter_by(login=user_name).one()
+        except NoResultFound as ex:
+            return None
         else:
-            return 'User already exists'
+            return result
+
+    def nickname_exists(self, nickname: str):
+        return self.session.query(User).filter_by(nickname=nickname).first()
+
+    def add_new_user(self, nickname: str, user_name: str, password: str):
+        if self.user_exists(user_name):
+            return 'user_exists'
+
+        elif self.nickname_exists(nickname):
+            return 'Nick is not available'
+
+        date = arrow.now().format('YYYY-MM-DDTh:m:s.SS')
+        user = User(user_id=uuid.uuid4().hex, nickname=nickname, login=user_name, password=password,
+                    registration_date=date)
+        self.session.add(user)
+        self.save_to_db()
+        return 'added'
 
     def save_to_db(self):
         self.session.commit()
@@ -77,7 +90,8 @@ class DBManager:
         new_messages = []
         for msg in self.session.query(MessageTable).all():
             message = {
-                'user': msg.user,
+                'sender': msg.sender,
+                'receiver': msg.receiver,
                 'message': msg.message,
                 'time': msg.date
             }
