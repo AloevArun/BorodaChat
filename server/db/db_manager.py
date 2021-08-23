@@ -25,7 +25,7 @@ class DBManager:
 
         self.session = sessionmaker(bind=self.engine)()
 
-    def authentication(self, user_name: str, password: str):
+    def login(self, user_name: str, password: str):
         user = self.user_exists(user_name)
         print(user)
         return {'response': user.nickname} if user and user.password == password else {'response': 'denied'}
@@ -33,7 +33,7 @@ class DBManager:
     def user_exists(self, login: str):
         try:
             result = self.session.query(User).filter_by(login=login).one()
-        except NoResultFound as ex:
+        except NoResultFound:
             return None
         else:
             return result
@@ -54,10 +54,6 @@ class DBManager:
         self.session.add(user)
         self.save_to_db()
         return {'response': 'added'}
-
-    def save_to_db(self):
-        self.session.commit()
-        self.session.flush()
 
     def add_new_message(self, sender: str, receiver: str, text: str):
         date = arrow.now().format('YYYY-MM-DDTh:m:s.SS')
@@ -106,3 +102,7 @@ class DBManager:
             self.session.flush()
 
         return new_messages
+
+    def save_to_db(self):
+        self.session.commit()
+        self.session.flush()

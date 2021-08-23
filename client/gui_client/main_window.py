@@ -1,22 +1,21 @@
-import sys
+import sys, time
 from hashlib import sha256
+
 import arrow
+import requests.exceptions
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QDialog, QMessageBox
 
-from client.client import HttpClient
 from client.gui_client.gui_authentification import Ui_Dialog
 from client.gui_client.gui_design import Ui_MainWindow
+from client.request_manager import HttpClient
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def __init__(self):
-        # Это здесь нужно для доступа к переменным, методам
-        # и т.д. в файле gui_design.py
         super().__init__()
-        self.setupUi(self)  # Это нужно для инициализации нашего дизайна
-
+        self.setupUi(self)
         self.dialog = QDialog()
         self.dialog.ui = Ui_Dialog()
         self.dialog.ui.setupUi(self.dialog)
@@ -27,10 +26,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.auth_window.LoginButton.clicked.connect(self.login)
         self.auth_window.PingButton.clicked.connect(self.check_server_status)
 
-        # self.sendButton.clicked.connect(self.send_message)
-        # self.updateButton.clicked.connect(self.update_widget)
-        # self.add_messages(self.all_db_messages())  # получаем ВСЕ сообщения при запуске
-        # self.check_server_status()
         self.client = HttpClient()
         self.user_nick = None
         self.msgbox = QMessageBox()
@@ -84,7 +79,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dialog.accept()
         self.UserLabel.setText(self.user_nick)
 
-    def all_db_messages(self):  # возвращает ВСЕ сообщения из базы
+    # получение ВСЕХ сообщений из базы
+    def all_db_messages(self):
         messages = self.client.get_all_messages()['messages']
         return messages
 
@@ -95,6 +91,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.add_messages(messages)
             return messages
 
+    # НЕ АКТУАЛЬНО
+    # добавление ВСЕХ требуемых сообщений из 'messages_to_add'
     def add_messages(self, messages_to_add: dict) -> None:
         if messages_to_add != 0:
             for message in messages_to_add:
@@ -103,8 +101,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.messageList.scrollToBottom()
 
-    # добавление ВСЕХ требуемых сообщений из 'messages_to_add'
-
+    # НЕ АКТУАЛЬНО
+    # добавление одного(!) сообщения
     def add_message_to_widget(self, message: dict) -> None:
         msg = message['message']
         user = message['user']
@@ -113,8 +111,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         arw = arrow.get(date, fmt).format(fmt)
         self.messageList.addItem(f'| {arw} | {user}: {msg}')
 
-    # добавление одного(!) сообщения
-
+    # НЕ АКТУАЛЬНО
+    # отправляем сообщение и обновляем сообщения с сервера
+    # !!!убрать 'update_messages()' и 'check_server_status()' после реализации автоматического обновления
     def send_message(self) -> None:
         if self.userLineEdit.text() != '' and self.messageLineEdit.text() != '':  # если поля не пустые
             text = self.messageLineEdit.text()  # текст сообщения
@@ -123,20 +122,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.messageLineEdit.clear()  # очищаем поле ввода сообщения ('messageLineEdit')
             self.check_server_status()
 
-    # отправляем сообщение и обновляем сообщения с сервера
-    # !!!убрать 'update_messages()' и 'check_server_status()' после реализации автоматического обновления
+    # пинг\проверка соединения
     def check_server_status(self):
         host = {
             "ip": self.auth_window.IPTextEdit.toPlainText(),
             "port": self.auth_window.PortTextEdit.toPlainText()
         }
+        time1 = time.time()
         try:
             self.client.base_url = f'http://{host["ip"]}:{host["port"]}'
             if self.client.check_server()["status"] == 'online':
+                time2 = time.time()
+                print(round(time2 - time1))
                 self.msgbox.setWindowTitle('Сервер')
                 self.msgbox.setText('Соединение с сервером установлено!')
                 self.msgbox.exec()
-        except:
+        except requests.exceptions.ConnectionError:
             self.msgbox.setText('Сервер недоступен, проверьте введенный адрес.')
             self.msgbox.exec()
 
