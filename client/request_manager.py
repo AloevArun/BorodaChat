@@ -17,8 +17,10 @@ class HttpClient:
         new_msgs = requests.post(f'{self.base_url}/whats_new', json=body)
         return new_msgs.json()
 
-    def get_all_messages(self):
-        msgs = requests.get(f'{self.base_url}/msgs')
+    def get_all_messages(self, user: str, password: str):
+        body = {'user': user,
+                'password': password}
+        msgs = requests.post(f'{self.base_url}/messages', json=body)
         return msgs.json()
 
     def check_server(self):

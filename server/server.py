@@ -76,12 +76,13 @@ def get_user_messages():
     if db.login(user, password):
         messages = db.read_all_messages()
         if len(messages) != 0:
-            user_messages = pack_data(user, messages)
-            return user_messages
+            response = pack_data(user, messages)
+
         else:
-            return {"response": "no_updates"}
+            response = {"response": "no_updates"}
     else:
-        return {"response": "non_authorized"}
+        response = {"response": "non_authorized"}
+    return response
 
 
 # получить все сообщения отправленные после time и запаковать

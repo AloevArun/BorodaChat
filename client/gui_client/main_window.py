@@ -1,4 +1,4 @@
-import sys, time
+import sys
 from hashlib import sha256
 
 import arrow
@@ -16,6 +16,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+
         self.dialog = QDialog()
         self.dialog.ui = Ui_Dialog()
         self.dialog.ui.setupUi(self.dialog)
@@ -23,17 +24,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.auth_window = self.dialog.ui
 
         self.auth_window.RegistButton.clicked.connect(self.registration)
-        self.auth_window.LoginButton.clicked.connect(self.login)
+        self.auth_window.LoginButton.clicked.connect(self.show_chat)
         self.auth_window.PingButton.clicked.connect(self.check_server_status)
+
+        self.window().UpdateButton.clicked.connect(self.all_db_messages)
 
         self.client = HttpClient()
         self.user_nick = None
         self.msgbox = QMessageBox()
         self.dialog.exec()
-        self.dialog.rejected.connect(sys.exit(0))
+        self.password = ''
 
     def show_chat(self):
-        chat_dialog = self.Q
+        login = self.auth_window.LoginTextEdit.toPlainText()
+        password = str(sha256(self.auth_window.PasswordTextEdit.toPlainText().encode('utf-8')).hexdigest())
+        response = self.auth(login, password)
+        if response != 'denied':
+            self.window().show()
+            self.UserLabel.setText(response)
+            self.password = password
+            self.dialog.close()
+        else:
+            pass
 
     def registration(self):
         registration_body = {
@@ -59,29 +71,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.auth_window.RegistStatusLabel.setText(f'Что-то пошло не так.')
             self.auth_window.RegistStatusLabel.setStyleSheet('color: red')
 
-    def login(self):
+    def auth(self, login, password):
         credentials = {
-            "login": self.auth_window.LoginTextEdit.toPlainText(),
-            "password": self.auth_window.PasswordTextEdit.toPlainText(),
+            "login": login,
+            "password": password,
         }
-        assert '' not in credentials.values(), f'Some fields is empty. {credentials.values()}'
-
         response = self.client.login(credentials)
         self.user_nick = response.get('response')
 
         if self.user_nick == 'denied':
-            self.show_chat()
             self.msgbox.setWindowTitle('Сервер')
             self.msgbox.setText("Неверный логин/пароль!")
             self.msgbox.exec()
-            return
-
-        self.dialog.accept()
-        self.UserLabel.setText(self.user_nick)
+            return 'denied'
+        else:
+            return response['response']
 
     # получение ВСЕХ сообщений из базы
     def all_db_messages(self):
-        messages = self.client.get_all_messages()['messages']
+        user = self.UserLabel.text()
+        messages = self.client.get_all_messages(user, self.password)
+        print(messages)
         return messages
 
     def update_widget(self):
@@ -128,12 +138,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             "ip": self.auth_window.IPTextEdit.toPlainText(),
             "port": self.auth_window.PortTextEdit.toPlainText()
         }
-        time1 = time.time()
         try:
             self.client.base_url = f'http://{host["ip"]}:{host["port"]}'
             if self.client.check_server()["status"] == 'online':
-                time2 = time.time()
-                print(round(time2 - time1))
                 self.msgbox.setWindowTitle('Сервер')
                 self.msgbox.setText('Соединение с сервером установлено!')
                 self.msgbox.exec()
@@ -145,5 +152,4 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
     app = QtWidgets.QApplication(sys.argv)  # новый экземпляр QApplication
     window = MainWindow()  # создаём объект класса ExampleApp
-    window.show()  # запускаем интерфейс
     app.exec()  # запускаем движок

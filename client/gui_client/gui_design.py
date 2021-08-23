@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(528, 368)
+        MainWindow.resize(528, 400)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.MessageLineEdit = QtWidgets.QLineEdit(self.centralwidget)
@@ -58,6 +58,9 @@ class Ui_MainWindow(object):
         self.UserLabel.setLayoutDirection(QtCore.Qt.LayoutDirection.LeftToRight)
         self.UserLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.UserLabel.setObjectName("UserLabel")
+        self.UpdateButton = QtWidgets.QPushButton(self.centralwidget)
+        self.UpdateButton.setGeometry(QtCore.QRect(10, 370, 141, 23))
+        self.UpdateButton.setObjectName("UpdateButton")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -70,6 +73,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Пользователи:"))
         self.label_2.setText(_translate("MainWindow", "Сообщения:"))
         self.UserLabel.setText(_translate("MainWindow", "Пользователь"))
+        self.UpdateButton.setText(_translate("MainWindow", "Обновить"))
 
 
 if __name__ == "__main__":
