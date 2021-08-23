@@ -37,6 +37,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dialog.exec()
         self.dialog.rejected.connect(sys.exit(0))
 
+    def show_chat(self):
+        chat_dialog = self.Q
+
     def registration(self):
         registration_body = {
             "nickname": self.auth_window.RegistTextEdit.toPlainText(),
@@ -46,21 +49,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         assert '' not in registration_body.values(), f'Some fields is empty. {registration_body.values()}'
 
-        self.client.registration(registration_body)
-        self.auth_window.RegistButton.setEnabled(False)
-        self.auth_window.RegistButton.setText("Регистрация завершена")
+        response = self.client.registration(registration_body)['response']
+
+        if response == 'added':
+            self.auth_window.RegistStatusLabel.setText(f'Пользователь успешно зарегистрирован.')
+            self.auth_window.RegistStatusLabel.setStyleSheet('color: green')
+        elif response == 'user_exists':
+            self.auth_window.RegistStatusLabel.setText(f'Пользователь с таким логином уже зарегистрирован!')
+            self.auth_window.RegistStatusLabel.setStyleSheet('color: red')
+        elif response == 'nickname_exists':
+            self.auth_window.RegistStatusLabel.setText(f'Пользователь с таким ником уже зарегистрирован!')
+            self.auth_window.RegistStatusLabel.setStyleSheet('color: red')
+        else:
+            self.auth_window.RegistStatusLabel.setText(f'Что-то пошло не так.')
+            self.auth_window.RegistStatusLabel.setStyleSheet('color: red')
 
     def login(self):
         credentials = {
-            "user_name": self.auth_window.LoginTextEdit.toPlainText(),
+            "login": self.auth_window.LoginTextEdit.toPlainText(),
             "password": self.auth_window.PasswordTextEdit.toPlainText(),
         }
         assert '' not in credentials.values(), f'Some fields is empty. {credentials.values()}'
 
-        response = self.client.login(credentials).json()
-        self.user_nick = response.get('nickname')
+        response = self.client.login(credentials)
+        self.user_nick = response.get('response')
 
-        if not self.user_nick:
+        if self.user_nick == 'denied':
+            self.show_chat()
             self.msgbox.setWindowTitle('Сервер')
             self.msgbox.setText("Неверный логин/пароль!")
             self.msgbox.exec()

@@ -27,11 +27,11 @@ class HttpClient:
 
     def registration(self, body: dict):
         response = requests.post(f'{self.base_url}/registration', json=body)
-        return response
+        return response.json()
 
     def login(self, body: dict):
         response = requests.post(f'{self.base_url}/login', json=body)
-        return response
+        return response.json()
 
 
 if __name__ == '__main__':

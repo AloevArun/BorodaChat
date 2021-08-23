@@ -27,12 +27,12 @@ class DBManager:
 
     def authentication(self, user_name: str, password: str):
         user = self.user_exists(user_name)
-        if user and user.password == password:
-            return {'nickname': user.nickname}
+        print(user)
+        return {'response': user.nickname} if user and user.password == password else {'response': 'denied'}
 
-    def user_exists(self, user_name: str):
+    def user_exists(self, login: str):
         try:
-            result = self.session.query(User).filter_by(nickname=user_name).one()
+            result = self.session.query(User).filter_by(login=login).one()
         except NoResultFound as ex:
             return None
         else:
@@ -43,17 +43,17 @@ class DBManager:
 
     def add_new_user(self, nickname: str, user_name: str, password: str):
         if self.user_exists(user_name):
-            return 'user_exists'
+            return {'response': 'user_exists'}
 
         elif self.nickname_exists(nickname):
-            return 'Nick is not available'
+            return {'response': 'nickname_exists'}
 
         date = arrow.now().format('YYYY-MM-DDTh:m:s.SS')
         user = User(user_id=uuid.uuid4().hex, nickname=nickname, login=user_name, password=password,
                     registration_date=date)
         self.session.add(user)
         self.save_to_db()
-        return 'added'
+        return {'response': 'added'}
 
     def save_to_db(self):
         self.session.commit()

@@ -36,10 +36,10 @@ def add_message():
 @app.route('/login', methods=['POST'])
 def login():
     body = request.get_json()
-    user_name = body['user_name']
+    nickname = body['login']
     password = body['password']
 
-    response = db.authentication(user_name, password)
+    response = db.authentication(nickname, password)
     return response if response else {}
 
 
@@ -47,7 +47,7 @@ def login():
 def registration():
     body = request.get_json()
     nickname = body['nickname']
-    user_name = body['user_name']
+    user_name = body['login']
     password = body['password']
 
     response = db.add_new_user(nickname, user_name, password)
