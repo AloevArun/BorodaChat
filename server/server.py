@@ -7,7 +7,7 @@ db = DBManager()
 
 
 # раскидать сообщения по адресатам в словарь(+++)
-def pack_data(user: str, messages: dict):
+def sort_messages(user: str, messages: dict):
     user_messages = {}
     for message in messages['messages']:
         users = message['sender'], message['receiver']
@@ -83,7 +83,7 @@ def get_user_messages():
             messages = {"messages": db.read_all_messages(is_update=True, time=time)}
         if len(messages['messages']) != 0:
             try:
-                response = pack_data(nickname, messages)
+                response = sort_messages(nickname, messages)
             except all:
                 response = {"response": 'db_error'}
         else:
