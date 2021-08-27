@@ -1,5 +1,5 @@
 #    def delete_user(self, user: str):
-#        user_ = self.session.query(User).filter_by(user=user).first()
+#        user_ = self.session.query(UserTable).filter_by(user=user).first()
 #        self.session.delete(user_)
 #        self.session.commit()
 #        self.session.flush()

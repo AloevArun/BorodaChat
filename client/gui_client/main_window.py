@@ -1,11 +1,10 @@
 import sys
-from hashlib import sha256
-
 import arrow
 import requests.exceptions
+
+from hashlib import sha256
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QDialog, QMessageBox
-
 from client.gui_client.gui_authentification import Ui_Dialog
 from client.gui_client.gui_design import Ui_MainWindow
 from client.request_manager import HttpClient
