@@ -125,9 +125,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # отправляем сообщение и обновляем сообщения с сервера
     # !!!убрать 'update_messages()' и 'check_server_status()' после реализации автоматического обновления
     def send_message(self) -> None:
-        if self.userLineEdit.text() != '' and self.messageLineEdit.text() != '':  # если поля не пустые
+        sender = self.UserLabel.text()
+        if self.MessageLineEdit.text() != '':  # если поля не пустые
             text = self.messageLineEdit.text()  # текст сообщения
-            self.client.send_message(text, self.user_nick)  # отправляем имя пользователя, сообщение и время
+            self.client.send_message(text, sender)  # отправляем имя пользователя, сообщение и время
             self.update_widget()  # обновляем сообщения с сервера
             self.messageLineEdit.clear()  # очищаем поле ввода сообщения ('messageLineEdit')
             self.check_server_status()

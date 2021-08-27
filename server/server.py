@@ -9,30 +9,37 @@ db = DBManager()
 # раскидать сообщения по адресатам в словарь
 def pack_data(user: str, messages: dict):
     user_messages = {}
-    for message in messages:
+    for message in messages['messages']:
         users = message['sender'], message['receiver']
 
         if 'chat' != message['receiver']:
             if user not in users:
                 continue
 
-        key = 'receiver' if user == message['sender'] or 'chat' in message['receiver'] else 'sender'
+        if user == message['sender'] or 'chat' in message['receiver']:
+            key = 'receiver'
+        else:
+            key = 'sender'
+
         if not user_messages.get(message[key]):
             user_messages[message[key]] = []
 
         user_messages[message[key]].append(message)
-        return user_messages
+    return user_messages if user_messages else 'no_messages'
 
 
 # добавление сообщения в базу
 @app.route('/msg', methods=['POST'])
 def add_message():
     body = request.get_json()
-    sender = body['sender']
-    receiver = body['receiver']
-    text = body['text']
-    db.add_new_message(sender, receiver, text)
-    return '201'
+    sender = db.login(body['login'], body['password'])['response']
+    if sender != 'denied':
+        receiver = body['receiver']
+        text = body['text']
+        db.add_new_message(sender, receiver, text)
+        return 'done'
+    else:
+        return 'non_authorized'
 
 
 # проверка пароля
@@ -70,16 +77,19 @@ def all_messages():
 @app.route('/messages', methods=['POST'])
 def get_user_messages():
     body = request.get_json()
-    user = body['user']
+    user = body['login']
     password = body['password']
-
-    if db.login(user, password):
-        messages = db.read_all_messages()
-        if len(messages) != 0:
-            response = pack_data(user, messages)
-
+    nickname = db.login(user, password)['response']
+    if nickname != 'denied':
+        messages = {"messages": db.read_all_messages()}
+        print(len(messages), messages)
+        if len(messages['messages']) != 0:
+            try:
+                response = pack_data(nickname, messages)
+            except TypeError:
+                response = {"response": 'no_messages_for_user'}
         else:
-            response = {"response": "no_updates"}
+            response = {"response": "no_messages"}
     else:
         response = {"response": "non_authorized"}
     return response

@@ -25,8 +25,8 @@ class DBManager:
 
         self.session = sessionmaker(bind=self.engine)()
 
-    def login(self, user_name: str, password: str):
-        user = self.user_exists(user_name)
+    def login(self, login: str, password: str):
+        user = self.user_exists(login)
         print(user)
         return {'response': user.nickname} if user and user.password == password else {'response': 'denied'}
 
