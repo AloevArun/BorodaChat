@@ -69,8 +69,9 @@ class DBManager:
         self.session.add(msg)
         self.save_to_db()
 
-    def read_all_messages(self):
-        all_messages = []
+    def read_all_messages(self, is_update=False, time='', ):
+        messages = []
+
         for msg in self.session.query(MessageTable).all():
             message = {
                 'sender': msg.sender,
@@ -78,31 +79,58 @@ class DBManager:
                 'message': msg.message,
                 'time': msg.date
             }
-            all_messages.append(message)
-        self.session.flush()
-        return all_messages
 
-    def read_new_messages(self, time: str):
-        new_messages = []
-        all_messages = self.session.query(MessageTable).all()
-        if len(all_messages) != 0:
-            for msg in all_messages:
-                message = {
-                    'sender': msg.sender,
-                    'receiver': msg.receiver,
-                    'message': msg.message,
-                    'time': msg.date
-                }
-
+            if not is_update:
+                messages.append(message)
+            else:
                 fmt = 'YYYY-MM-DDTh:m:s.SS'
                 client_message_time = arrow.get(message['time'], fmt)
                 last_db_message_time = arrow.get(time, fmt)
                 if client_message_time > last_db_message_time:
-                    new_messages.append(message)
-            self.session.flush()
+                    messages.append(message)
 
-        return new_messages
+        self.session.flush()
+        return messages
 
     def save_to_db(self):
         self.session.commit()
         self.session.flush()
+
+    #   def read_new_messages(self, time: str):
+    #       new_messages = []
+    #       for msg in self.session.query(MessageTable).all():
+    #           message = {
+    #               'sender': msg.sender,
+    #               'receiver': msg.receiver,
+    #               'message': msg.message,
+    #               'time': msg.date
+    #           }
+    #           fmt = 'YYYY-MM-DDTh:m:s.SS'
+    #           client_message_time = arrow.get(message['time'], fmt)
+    #           last_db_message_time = arrow.get(time, fmt)
+    #           if client_message_time > last_db_message_time:
+    #               new_messages.append(message)
+    #       self.session.flush()
+    #       return new_messages
+
+    # def read_new_messages(self, time: str):
+    #     new_messages = []
+    #     all_messages = self.session.query(MessageTable).all()
+    #     if len(all_messages) != 0:
+    #         for msg in all_messages:
+    #             message = {
+    #                 'sender': msg.sender,
+    #                 'receiver': msg.receiver,
+    #                 'message': msg.message,
+    #                 'time': msg.date
+    #             }
+    #
+    #             fmt = 'YYYY-MM-DDTh:m:s.SS'
+    #             client_message_time = arrow.get(message['time'], fmt)
+    #             last_db_message_time = arrow.get(time, fmt)
+    #             if client_message_time > last_db_message_time:
+    #                 new_messages.append(message)
+    #         self.session.flush()
+    #
+    #     return new_messages
+
