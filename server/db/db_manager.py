@@ -11,6 +11,9 @@ from .tables import UserTable, MessageTable, Base
 
 class DBManager:
     def __init__(self):
+        super().__init__()
+        self.Message = self
+        self.User = self
         self.session = None
         self.database_path = 'db/main.db'
         self.engine = create_engine(f'sqlite:///{self.database_path}?check_same_thread=False')
@@ -35,17 +38,6 @@ class User(DBManager):
         user = self.user_exists(login)
         return {'response': user.nickname} if user and user.password == password else {'response': 'denied'}
 
-    def user_exists(self, login: str):
-        try:
-            result = self.session.query(UserTable).filter_by(login=login).first()
-        except NoResultFound:
-            return None
-        else:
-            return result
-
-    def nickname_exists(self, nickname: str):
-        return self.session.query(UserTable).filter_by(nickname=nickname).first()
-
     def create(self, nickname: str, user_name: str, password: str):
         if self.user_exists(user_name):
             return {'response': 'user_exists'}
@@ -60,8 +52,20 @@ class User(DBManager):
             self.save_to_db()
             return {'response': 'added'}
 
+    def user_exists(self, login: str):
+        try:
+            result = self.session.query(UserTable).filter_by(login=login).first()
+        except NoResultFound:
+            return None
+        else:
+            return result
+
+    def nickname_exists(self, nickname: str):
+        return self.session.query(UserTable).filter_by(nickname=nickname).first()
+
 
 class Message(DBManager):
+
     def add(self, sender: str, receiver: str, text: str):
         date = arrow.now().format('YYYY-MM-DDTh:m:s.SS')
 
@@ -93,3 +97,21 @@ class Message(DBManager):
 
         self.session.flush()
         return messages
+
+#    def delete(self, user: str, time: str):
+#        message = self.session.query(MessageTable).filter_by(date=time).first()
+#        message_to_del = MessageTable(
+#            message_id=message.message_id,
+#            sender=message.sender,
+#            receiver=message.receiver,
+#            message=message.message,
+#            date=message.date
+#        )
+#        if message:
+#            if message.sender == user:
+#                self.session.query(MessageTable).delete(message_to_del)
+#                return 'done'
+#            else:
+#                return 'wrong_sender'
+#        else:
+#            return 'message_not_exists'

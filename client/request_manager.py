@@ -38,4 +38,3 @@ class HttpClient:
 
 if __name__ == '__main__':
     r = HttpClient()
-    print(r.get_all_messages())
