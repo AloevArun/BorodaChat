@@ -1,20 +1,19 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from db.db_manager import User, Message
-
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.curdir), "instance"))
 msg = Message()
 usr = User()
-
+print(usr.get_all())
 
 # логин(+++)
 @app.route('/login', methods=['POST'])
 def login():
     body = request.get_json()
-    nickname = body['login']
+    login = body['login']
     password = body['password']
 
-    response = usr.login(nickname, password)
+    response = usr.login(login, password)
     return response if response else {}
 
 
@@ -23,22 +22,32 @@ def login():
 def registration():
     body = request.get_json()
     nickname = body['nickname']
-    user_name = body['login']
+    login = body['login']
     password = body['password']
-    response = usr.create(nickname, user_name, password)
+    response = usr.create(nickname, login, password)
     return response
+
+
+@app.route('/users', methods=['POST'])
+def get_users():
+    body = request.get_json()
+    login = body['login']
+    password = body['password']
+    if usr.login(login, password) != 'denied':
+        response = usr.get_all()
+    else:
+        response = {'response': 'non_authorized'}
+    return jsonify(response)
 
 
 # получить сообщения из базы(+++)
 @app.route('/messages', methods=['POST'])
 def get_messages():
     body = request.get_json()
-
     user = body['login']
     password = body['password']
     nickname = usr.login(user, password)['response']
-    method = body['method']
-    time = body['time'] if method == 'update' else '0001-01-01T0:00:00.00'
+    time = body['time']
 
     if nickname != 'denied':
         messages = {"messages": msg.read(time)}
@@ -51,6 +60,7 @@ def get_messages():
             response = {"response": "no_messages"}
     else:
         response = {"response": "non_authorized"}
+    print(response)
     return response
 
 
@@ -99,7 +109,6 @@ def sort_messages(user: str, messages: dict):
 
 if __name__ == '__main__':
     app.run()
-
 #  @app.route('/del_message', methods=['POST'])
 #  def del_message():
 #      body = request.get_json()

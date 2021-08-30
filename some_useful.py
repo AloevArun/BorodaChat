@@ -1,3 +1,5 @@
+python -m PyQt6.uic.pyuic -x C:\Users\Bananator\PycharmProjects\BorodaChat\client\gui_client\gui_design.ui -o C:\Users\Bananator\PycharmProjects\BorodaChat\client\gui_client\gui_design.py
+
 #    def delete_user(self, user: str):
 #        user_ = self.session.query(UserTable).filter_by(user=user).first()
 #        self.session.delete(user_)

@@ -1,3 +1,4 @@
+import json.decoder
 import sys
 import arrow
 import requests.exceptions
@@ -25,14 +26,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.auth_window.RegistButton.clicked.connect(self.registration)
         self.auth_window.LoginButton.clicked.connect(self.show_chat)
         self.auth_window.PingButton.clicked.connect(self.check_server_status)
-
+        self.UserList.itemClicked.connect(self.update_messages_widget)
         self.window().UpdateButton.clicked.connect(self.all_db_messages)
 
         self.client = HttpClient()
         self.user_nick = None
         self.msgbox = QMessageBox()
         self.dialog.exec()
-        self.password = ''
+        self._login = ''
+        self._user = ''
+        self._password = ''
 
     def show_chat(self):
         login = self.auth_window.LoginTextEdit.toPlainText()
@@ -41,10 +44,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if response != 'denied':
             self.window().show()
             self.UserLabel.setText(response)
-            self.password = password
-            self.dialog.close()
-        else:
-            pass
+            self._login = login
+            self._password = password
+            self._user = response
+            self.dialog.hide()
+            try:
+                messages = self.all_db_messages()
+                if list(messages.keys())[0] == 'response':
+                    if messages['response'] == 'no_messages':
+                        self.msgbox.information(self, 'Внимание', 'К сожалению, для вас пока нет сообщений.')
+                    if messages['response'] == 'dict_error':
+                        self.msgbox.critical(self, 'Ошибка', 'Ошибка сервера.')
+            except json.decoder.JSONDecodeError:
+                self.msgbox.critical(self, 'Ошибка', 'Некорректные данные!')
+            else:
+                self.update_users_widget()
+            self.UserList.setCurrentRow(0)
+
+    def all_db_messages(self):
+        messages = self.client.get_messages(self._login, self._password)
+        print(self._login, self._password)
+        print(messages)
+        return messages
+
+    def get_users(self):
+        users = self.client.get_users(self._login, self._password)
+        return users
 
     def registration(self):
         registration_body = {
@@ -87,25 +112,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return response['response']
 
     # получение ВСЕХ сообщений из базы
-    def all_db_messages(self):
-        user = self.UserLabel.text()
-        messages = self.client.get_all_messages(user, self.password)
-        print(messages)
-        return messages
 
-    def update_widget(self):
-        time = self.messageList.item(self.messageList.count() - 1).text()
-        messages = self.client.update_messages(time)['messages']
-        if len(messages) != 0:
-            self.add_messages(messages)
-            return messages
+    def update_users_widget(self):
+        self.UserList.addItem(f'Общий чат')
+        users = self.client.get_users(self._login, self._password)
+        if len(users) != 0:
+            for user in users:
+                if user != self._user:
+                    self.UserList.addItem(user)
 
+    #   time = self.messageList.item(self.messageList.count() - 1).text()
     # НЕ АКТУАЛЬНО
     # добавление ВСЕХ требуемых сообщений из 'messages_to_add'
-    def add_messages(self, messages_to_add: dict) -> None:
+    def update_messages_widget(self):
+        messages = []
+        guest = self.UserList.currentItem().text()
+        print(self._login, self._user, self._password, guest)
+        all_messages = self.client.get_messages(self._login, self._password)
+        print(all_messages)
+        for message in all_messages:
+            body = {
+                'sender': message.sender,
+                'receiver': message.receiver,
+                'message': message.message,
+                'time': message.date
+            }
+            parsed_message = f'|{body["time"]} | {body["sender"]}: {body["message"]}'
+            messages.append(parsed_message)
+        if messages:
+            self.add_user_messages(messages)
+
+    def add_user_messages(self, messages_to_add) -> None:
         if messages_to_add != 0:
             for message in messages_to_add:
-                if message not in self.messageList.selectedItems():
+                if message not in self.MessageList.selectedItems():
                     self.add_message_to_widget(message)
 
         self.messageList.scrollToBottom()
@@ -114,11 +154,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # добавление одного(!) сообщения
     def add_message_to_widget(self, message: dict) -> None:
         msg = message['message']
-        user = message['user']
+        sender = message['sender']
         date = message['time']
         fmt = 'YYYY-MM-DDTh:m:s.SS'
         arw = arrow.get(date, fmt).format(fmt)
-        self.messageList.addItem(f'| {arw} | {user}: {msg}')
+        self.MessageList.addItem(f'| {arw} | {sender}: {msg}')
 
     # НЕ АКТУАЛЬНО
     # отправляем сообщение и обновляем сообщения с сервера
@@ -145,8 +185,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.msgbox.setText('Соединение с сервером установлено!')
                 self.msgbox.exec()
         except requests.exceptions.ConnectionError:
-            self.msgbox.setText('Сервер недоступен, проверьте введенный адрес.')
-            self.msgbox.exec()
+            self.raise_message('Сервер', 'Сервер недоступен, проверьте введенный адрес')
 
 
 if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем

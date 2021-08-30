@@ -24,16 +24,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QListView" name="UserList">
-    <property name="geometry">
-     <rect>
-      <x>5</x>
-      <y>29</y>
-      <width>151</width>
-      <height>331</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="SendButton">
     <property name="geometry">
      <rect>
@@ -152,6 +142,16 @@
     </property>
     <property name="text">
      <string>Обновить</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="UserList">
+    <property name="geometry">
+     <rect>
+      <x>5</x>
+      <y>31</y>
+      <width>151</width>
+      <height>331</height>
+     </rect>
     </property>
    </widget>
   </widget>

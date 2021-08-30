@@ -12,14 +12,10 @@ class HttpClient:
         }
         requests.post(f'{self.base_url}/msg', json=body)
 
-    def update_messages(self, time: str):
-        body = {'time': time}
-        new_msgs = requests.post(f'{self.base_url}/whats_new', json=body)
-        return new_msgs.json()
-
-    def get_all_messages(self, user: str, password: str):
-        body = {'user': user,
-                'password': password}
+    def get_messages(self, login: str, password: str, time='0001-01-01T00:00:00.00'):
+        body = {'login': login,
+                'password': password,
+                'time': time}
         msgs = requests.post(f'{self.base_url}/messages', json=body)
         return msgs.json()
 
@@ -33,6 +29,14 @@ class HttpClient:
 
     def login(self, body: dict):
         response = requests.post(f'{self.base_url}/login', json=body)
+        return response.json()
+
+    def get_users(self, login, password):
+        body = {
+            'login': login,
+            'password': password
+        }
+        response = requests.post(f'{self.base_url}/users', json=body)
         return response.json()
 
 

@@ -63,6 +63,12 @@ class User(DBManager):
     def nickname_exists(self, nickname: str):
         return self.session.query(UserTable).filter_by(nickname=nickname).first()
 
+    def get_all(self):
+        users = []
+        for user in self.session.query(UserTable.nickname):
+            users.append(''.join(user))
+        return users
+
 
 class Message(DBManager):
 
@@ -82,7 +88,6 @@ class Message(DBManager):
 
     def read(self, time):
         messages = []
-
         for msg in self.session.query(MessageTable).all():
             message = {
                 'sender': msg.sender,
