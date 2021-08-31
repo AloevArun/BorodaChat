@@ -102,21 +102,3 @@ class Message(DBManager):
 
         self.session.flush()
         return messages
-
-#    def delete(self, user: str, time: str):
-#        message = self.session.query(MessageTable).filter_by(date=time).first()
-#        message_to_del = MessageTable(
-#            message_id=message.message_id,
-#            sender=message.sender,
-#            receiver=message.receiver,
-#            message=message.message,
-#            date=message.date
-#        )
-#        if message:
-#            if message.sender == user:
-#                self.session.query(MessageTable).delete(message_to_del)
-#                return 'done'
-#            else:
-#                return 'wrong_sender'
-#        else:
-#            return 'message_not_exists'

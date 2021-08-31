@@ -8,7 +8,6 @@ usr = User()
 print(usr.get_all())
 
 
-# логин(+++)
 @app.route('/login', methods=['POST'])
 def login():
     body = request.get_json()
@@ -19,7 +18,6 @@ def login():
     return response if response else {}
 
 
-# регистрация(+++)
 @app.route('/registration', methods=['POST'])
 def registration():
     body = request.get_json()
@@ -42,7 +40,6 @@ def get_users():
     return jsonify(response)
 
 
-# получить сообщения из базы(+++)
 @app.route('/messages', methods=['POST'])
 def get_messages():
     body = request.get_json()
@@ -66,7 +63,6 @@ def get_messages():
     return response
 
 
-# добавление сообщения в базу(+++)
 @app.route('/add_message', methods=['POST'])
 def add_message():
     body = request.get_json()
@@ -80,14 +76,12 @@ def add_message():
         return 'unauthorized'
 
 
-# простой пинг(требуется переработка)
 @app.route('/is_online')
 def is_online():
     response = {'status': 'online'}
     return response
 
 
-# раскидать сообщения по адресатам в словарь(+++)
 def sort_messages(user: str, messages: dict):
     user_messages = {}
     for message in messages['messages']:
@@ -111,12 +105,3 @@ def sort_messages(user: str, messages: dict):
 
 if __name__ == '__main__':
     app.run()
-#  @app.route('/del_message', methods=['POST'])
-#  def del_message():
-#      body = request.get_json()
-#      user = usr.login(body['login'], body['password'])
-#      time = body['time']
-#      if user != 'denied':
-#          return msg.delete(user, time)
-#      else:
-#          return 'unauthorized'
