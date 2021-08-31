@@ -1,10 +1,12 @@
 import os
 from flask import Flask, request, jsonify
 from db.db_manager import User, Message
+
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.curdir), "instance"))
 msg = Message()
 usr = User()
 print(usr.get_all())
+
 
 # логин(+++)
 @app.route('/login', methods=['POST'])
@@ -91,7 +93,7 @@ def sort_messages(user: str, messages: dict):
     for message in messages['messages']:
         users = message['sender'], message['receiver']
 
-        if 'chat' != message['receiver']:
+        if 'global_chat' != message['receiver']:
             if user not in users:
                 continue
 

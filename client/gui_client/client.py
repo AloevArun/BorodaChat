@@ -5,12 +5,14 @@ class HttpClient:
     def __init__(self):
         self.base_url = 'http://127.0.0.1:5000'
 
-    def send_message(self, message: str, user: str):
+    def send_message(self, login, password, receiver, text):
         body = {
-            'text': message,
-            'user': user,
+            'login': login,
+            'password': password,
+            'receiver': receiver,
+            'text': text
         }
-        requests.post(f'{self.base_url}/msg', json=body)
+        requests.post(f'{self.base_url}/add_message', json=body)
 
     def get_messages(self, login: str, password: str, time='0001-01-01T00:00:00.00'):
         body = {'login': login,
