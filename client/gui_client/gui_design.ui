@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>528</width>
+    <width>750</width>
     <height>400</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>170</x>
       <y>330</y>
-      <width>261</width>
+      <width>471</width>
       <height>31</height>
      </rect>
     </property>
@@ -27,7 +27,7 @@
    <widget class="QPushButton" name="SendButton">
     <property name="geometry">
      <rect>
-      <x>440</x>
+      <x>650</x>
       <y>330</y>
       <width>81</width>
       <height>31</height>
@@ -35,16 +35,6 @@
     </property>
     <property name="text">
      <string>Отправить</string>
-    </property>
-   </widget>
-   <widget class="QListView" name="MessageList">
-    <property name="geometry">
-     <rect>
-      <x>170</x>
-      <y>30</y>
-      <width>351</width>
-      <height>291</height>
-     </rect>
     </property>
    </widget>
    <widget class="Line" name="line">
@@ -151,6 +141,16 @@
       <y>31</y>
       <width>151</width>
       <height>331</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="MessageList">
+    <property name="geometry">
+     <rect>
+      <x>175</x>
+      <y>30</y>
+      <width>561</width>
+      <height>291</height>
      </rect>
     </property>
    </widget>

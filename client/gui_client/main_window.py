@@ -13,6 +13,10 @@ from client.request_manager import HttpClient
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
+    _login = ''
+    _password = ''
+    _user = ''
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -33,9 +37,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.user_nick = None
         self.msgbox = QMessageBox()
         self.dialog.exec()
-        self._login = ''
-        self._user = ''
-        self._password = ''
 
     def show_chat(self):
         login = self.auth_window.LoginTextEdit.toPlainText()
@@ -44,9 +45,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if response != 'denied':
             self.window().show()
             self.UserLabel.setText(response)
-            self._login = login
-            self._password = password
-            self._user = response
+            MainWindow._login = login
+            MainWindow._password = password
+            MainWindow._user = response
             self.dialog.hide()
             try:
                 messages = self.all_db_messages()
@@ -62,13 +63,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.UserList.setCurrentRow(0)
 
     def all_db_messages(self):
-        messages = self.client.get_messages(self._login, self._password)
+        messages = self.client.get_messages(MainWindow._login, MainWindow._password)
         print(self._login, self._password)
         print(messages)
         return messages
 
     def get_users(self):
-        users = self.client.get_users(self._login, self._password)
+        users = self.client.get_users(MainWindow._login, MainWindow._password)
         return users
 
     def registration(self):
@@ -102,6 +103,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         }
         response = self.client.login(credentials)
         self.user_nick = response.get('response')
+        self._login = credentials['login']
+        self._password = credentials['password']
 
         if self.user_nick == 'denied':
             self.msgbox.setWindowTitle('Сервер')
@@ -115,7 +118,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def update_users_widget(self):
         self.UserList.addItem(f'Общий чат')
-        users = self.client.get_users(self._login, self._password)
+        users = self.client.get_users(MainWindow._login, MainWindow._password)
         if len(users) != 0:
             for user in users:
                 if user != self._user:
@@ -127,38 +130,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def update_messages_widget(self):
         messages = []
         guest = self.UserList.currentItem().text()
-        print(self._login, self._user, self._password, guest)
-        all_messages = self.client.get_messages(self._login, self._password)
-        print(all_messages)
-        for message in all_messages:
-            body = {
-                'sender': message.sender,
-                'receiver': message.receiver,
-                'message': message.message,
-                'time': message.date
-            }
-            parsed_message = f'|{body["time"]} | {body["sender"]}: {body["message"]}'
+        print(window._login, window._password, guest)
+        user_messages = self.client.get_messages(MainWindow._login, MainWindow._password)
+        print(user_messages)
+        for message in user_messages[guest]:
+            parsed_message = f'|{message["time"]} | {message["sender"]}: {message["message"]}'
             messages.append(parsed_message)
         if messages:
-            self.add_user_messages(messages)
+            self.add_user_messages(messages, guest)
 
-    def add_user_messages(self, messages_to_add) -> None:
+    def add_user_messages(self, messages_to_add, guest) -> None:
         if messages_to_add != 0:
             for message in messages_to_add:
                 if message not in self.MessageList.selectedItems():
-                    self.add_message_to_widget(message)
+                    self.add_message_to_widget(message, guest)
 
-        self.messageList.scrollToBottom()
+        self.MessageList.scrollToBottom()
 
     # НЕ АКТУАЛЬНО
     # добавление одного(!) сообщения
-    def add_message_to_widget(self, message: dict) -> None:
-        msg = message['message']
-        sender = message['sender']
-        date = message['time']
-        fmt = 'YYYY-MM-DDTh:m:s.SS'
-        arw = arrow.get(date, fmt).format(fmt)
-        self.MessageList.addItem(f'| {arw} | {sender}: {msg}')
+    def add_message_to_widget(self, message: dict, guest) -> None:
+        sender = message[25:30]
+        if sender == guest:
+            item = self.MessageList.item('%s' % message)
+            item.setBackground('red')
+            self.MessageList.addItem(item)
 
     # НЕ АКТУАЛЬНО
     # отправляем сообщение и обновляем сообщения с сервера
