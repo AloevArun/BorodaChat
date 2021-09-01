@@ -37,26 +37,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dialog.exec()
 
     def show_chat(self):
-        login = self.auth_window.LoginTextEdit.toPlainText()
-        password = str(sha256(self.auth_window.PasswordTextEdit.toPlainText().encode('utf-8')).hexdigest())
-        user = {
-            "login": self._login,
-            "password": self._password
-        }
-        if login and password:
-            try:
-                self.client.check_server()
-            except requests.exceptions.ConnectionError:
-                self.msgbox.setWindowTitle('Сервер')
-                self.msgbox.setText('Ошибка подключения.')
-                self.msgbox.exec()
-            else:
-                response = self.client.login(user)
+        try:
+            self.client.check_server()
+        except requests.exceptions.ConnectionError:
+            self.msgbox.setWindowTitle('Сервер')
+            self.msgbox.setText('Ошибка подключения к серверу!')
+            self.msgbox.exec()
+        else:
+            self._login = self.auth_window.LoginTextEdit.toPlainText()
+            self._password = str(sha256(self.auth_window.PasswordTextEdit.toPlainText().encode('utf-8')).hexdigest())
+            if self._login and self._password:
+                user = {
+                    "login": self._login,
+                    "password": self._password
+                }
+                response = self.client.login(user)['response']
                 if response != 'denied':
                     self.window().show()
-                    self.UserLabel.setText(response['response'])
-                    MainWindow._login = login
-                    MainWindow._password = password
+                    self.UserLabel.setText(response)
                     MainWindow._user = response
                     self.dialog.hide()
                     try:
@@ -72,6 +70,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.update_users_widget()
                         self.UserList.setCurrentRow(0)
                         self.update_messages_widget()
+                else:
+                    self.msgbox.critical(self, 'Ошибка', 'Пользователь с указанными данными не зарегистрирован!')
 
     def all_db_messages(self):
         messages = self.client.get_messages(MainWindow._login, MainWindow._password)
@@ -84,15 +84,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return users
 
     def registration(self):
-        user = {
-            "login": self._login,
-            "password": self._password
-        }
         try:
             self.client.check_server()
         except requests.exceptions.ConnectionError:
             self.msgbox.setWindowTitle('Сервер')
-            self.msgbox.setText('Ошибка подключения.')
+            self.msgbox.setText('Ошибка подключения к серверу!')
             self.msgbox.exec()
         else:
             registration_body = {
@@ -115,39 +111,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             elif response == 'nickname_exists':
                 self.auth_window.RegistStatusLabel.setText(f'Пользователь с таким ником уже зарегистрирован!')
                 self.auth_window.RegistStatusLabel.setStyleSheet('color: red')
-            else:
-                self.auth_window.RegistStatusLabel.setText(f'Что-то пошло не так.')
-                self.auth_window.RegistStatusLabel.setStyleSheet('color: red')
-
-    def auth(self, credentials):
-        try:
-            self.client.login(credentials)
-        except requests.exceptions.ConnectionError:
-            self.msgbox.setWindowTitle('Сервер')
-            self.msgbox.setText('Ошибка подключения.')
-            self.msgbox.exec()
-            raise requests.exceptions.ConnectionError
-        else:
-            response = self.client.login(credentials)
-            self._user = response.get('response')
-            self._login = credentials['login']
-            self._password = credentials['password']
-
-            if self._user == 'denied':
-                self.msgbox.setWindowTitle('Сервер')
-                self.msgbox.setText("Неверный логин/пароль!")
-                self.msgbox.exec()
-                return response
-            else:
-                return response
 
     def update_users_widget(self):
+        self.UserList.clear()
         self.UserList.addItem(f'Глобальный чат')
-        users = self.client.get_users(MainWindow._login, MainWindow._password)
+        users = self.client.get_users(self._login, self._password)
         if len(users) != 0:
             for user in users:
                 if user != self._user:
                     self.UserList.addItem(user)
+        self.UserList.setCurrentRow(0)
 
     def update_messages_widget(self):
         messages = []
@@ -156,7 +129,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             guest = self.UserList.currentItem().text()
         else:
             guest = 'global_chat'
-        user_messages = self.client.get_messages(MainWindow._login, MainWindow._password)
+        user_messages = self.client.get_messages(self._login, self._password)
         if guest in user_messages:
             for message in user_messages[guest]:
                 message_to_add = f'{message["sender"]}: {message["message"]}'
@@ -187,7 +160,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 receiver = 'global_chat'
             else:
                 receiver = self.UserList.currentItem().text()
-            self.client.send_message(window._login, window._password, receiver, text)
+            self.client.send_message(self._login, self._password, receiver, text)
             self.update_messages_widget()
             self.window().MessageLineEdit.clear()
 
@@ -199,14 +172,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             self.client.base_url = f'http://{host["ip"]}:{host["port"]}'
             if self.client.check_server()["status"] == 'online':
-                self.msgbox.setWindowTitle('Сервер')
-                self.msgbox.setText('Соединение с сервером установлено!')
-                self.msgbox.exec()
-            return True
+                self.msgbox.information(self, 'Успешно!', 'Соединение установлено!')
+                return True
         except requests.exceptions.ConnectionError:
-            self.msgbox.setWindowTitle('Сервер')
-            self.msgbox.setText('Ошибка подключения.')
-            self.msgbox.exec()
+            self.msgbox.critical(self, 'Ошибка!', 'Ошибка подключения!')
             return False
 
 

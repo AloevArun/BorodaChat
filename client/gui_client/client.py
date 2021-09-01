@@ -5,6 +5,26 @@ class HttpClient:
     def __init__(self):
         self.base_url = 'http://127.0.0.1:5000'
 
+    def check_server(self):
+        status = requests.get(f'{self.base_url}/is_online')
+        return status.json()
+
+    def login(self, body: dict):
+        response = requests.post(f'{self.base_url}/login', json=body)
+        return response.json()
+
+    def registration(self, body: dict):
+        response = requests.post(f'{self.base_url}/registration', json=body)
+        return response.json()
+
+    def get_users(self, login, password):
+        body = {
+            'login': login,
+            'password': password
+        }
+        response = requests.post(f'{self.base_url}/users', json=body)
+        return response.json()
+
     def send_message(self, login, password, receiver, text):
         body = {
             'login': login,
@@ -20,26 +40,6 @@ class HttpClient:
                 'time': time}
         msgs = requests.post(f'{self.base_url}/messages', json=body)
         return msgs.json()
-
-    def check_server(self):
-        status = requests.get(f'{self.base_url}/is_online')
-        return status.json()
-
-    def registration(self, body: dict):
-        response = requests.post(f'{self.base_url}/registration', json=body)
-        return response.json()
-
-    def login(self, body: dict):
-        response = requests.post(f'{self.base_url}/login', json=body)
-        return response.json()
-
-    def get_users(self, login, password):
-        body = {
-            'login': login,
-            'password': password
-        }
-        response = requests.post(f'{self.base_url}/users', json=body)
-        return response.json()
 
 
 if __name__ == '__main__':
