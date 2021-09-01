@@ -45,15 +45,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         }
         if login and password:
             try:
-                response = self.auth(user)['response']
+                self.client.check_server()
             except requests.exceptions.ConnectionError:
                 self.msgbox.setWindowTitle('Сервер')
                 self.msgbox.setText('Ошибка подключения.')
                 self.msgbox.exec()
             else:
+                response = self.client.login(user)
                 if response != 'denied':
                     self.window().show()
-                    self.UserLabel.setText(response)
+                    self.UserLabel.setText(response['response'])
                     MainWindow._login = login
                     MainWindow._password = password
                     MainWindow._user = response
@@ -72,7 +73,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.UserList.setCurrentRow(0)
                         self.update_messages_widget()
 
-
     def all_db_messages(self):
         messages = self.client.get_messages(MainWindow._login, MainWindow._password)
         print(self._login, self._password)
@@ -87,9 +87,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         user = {
             "login": self._login,
             "password": self._password
-            }
+        }
         try:
-            self.auth(user)
+            self.client.check_server()
         except requests.exceptions.ConnectionError:
             self.msgbox.setWindowTitle('Сервер')
             self.msgbox.setText('Ошибка подключения.')
@@ -98,7 +98,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             registration_body = {
                 "nickname": self.auth_window.RegistTextEdit.toPlainText(),
                 "login": self.auth_window.RegistEmailTextEdit.toPlainText(),
-                "password": str(sha256(self.auth_window.RegistPasswordTextEdit.toPlainText().encode('utf-8')).hexdigest())
+                "password": str(
+                    sha256(self.auth_window.RegistPasswordTextEdit.toPlainText().encode('utf-8')).hexdigest())
             }
 
             assert '' not in registration_body.values(), f'Some fields is empty. {registration_body.values()}'
@@ -139,7 +140,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 return response
             else:
                 return response
-
 
     def update_users_widget(self):
         self.UserList.addItem(f'Глобальный чат')
