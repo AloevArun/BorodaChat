@@ -141,7 +141,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        Dialog.setWindowTitle(_translate("Dialog", "Авторизация"))
         self.IPTextEdit.setPlainText(_translate("Dialog", "127.0.0.1"))
         self.PingButton.setText(_translate("Dialog", "Проверить соединение с сервером"))
         self.mainlabel.setText(_translate("Dialog", "<html><head/><body><p align=\"center\"><span style=\" color:#55557f;\">Corporative Chat</span><span style=\" color:#55557f; vertical-align:super;\">1.0 </span></p></body></html>"))

@@ -11,7 +11,6 @@ from .tables import UserTable, MessageTable, Base
 
 class DBManager:
     def __init__(self):
-        super().__init__()
         self.Message = self
         self.User = self
         self.session = None
