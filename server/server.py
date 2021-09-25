@@ -5,7 +5,6 @@ from db.db_manager import User, Message
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.curdir), "instance"))
 msg = Message()
 usr = User()
-print(usr.get_all())
 
 
 @app.route('/login', methods=['POST'])

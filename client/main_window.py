@@ -3,7 +3,6 @@ import sys
 import requests.exceptions
 
 from hashlib import sha256
-from PyQt6.QtCore import QThread
 from PyQt6 import QtWidgets, QtGui
 from PyQt6.QtWidgets import QDialog, QMessageBox
 from client.gui_client.gui_authentification import Ui_Dialog
@@ -30,35 +29,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.setupUi(self)
-        self.color = QtGui.QColor()
-        self.dialog = QDialog()
+        self.dialog = QDialog()  # объект взаимодействия с окном авторизации
         self.dialog.ui = Ui_Dialog()
         self.dialog.ui.setupUi(self.dialog)
 
-        self.auth_window = self.dialog.ui
+        self.auth_window = self.dialog.ui  # объект взаимодействия с элементами окна авторизации
 
+        # логика элементов окна авторизации
         self.auth_window.RegistButton.clicked.connect(self.registration)
         self.auth_window.LoginButton.clicked.connect(self.show_chat)
         self.auth_window.PingButton.clicked.connect(self.check_server_status)
 
-        self.window().SendButton.clicked.connect(self.send_message)
-        self.window().UpdateButton.clicked.connect(self.update_messages_widget)
-
+        # логика элементов главного окна(чата)
+        self.SendButton.clicked.connect(self.send_message)
+        self.UpdateButton.clicked.connect(self.update_messages_widget)
+        self.LogoutButton.clicked.connect(self.logout)
         self.UserList.itemClicked.connect(self.update_messages_widget)
-        self.user = User()
-        self.client = HttpClient()
-        self.client.base_url = (f'http://{self.auth_window.IPTextEdit.toPlainText()}:'
-                                f'{self.auth_window.PortTextEdit.toPlainText()}')
-        self.msgbox = QMessageBox()
-        self.dialog.exec()
 
+        self.user = User()  # объект хранения пользовательской информации
+        self.client = HttpClient()  # объект HTTP запросов
+        self.color = QtGui.QColor()  # объект для работы с цветом
+        self.msgbox = QMessageBox()  # объект выдачи быстрых уведомлений
+        self.dialog.exec()  # запуск окна авторизации
 
     def show_chat(self):
         self.user.login = self.auth_window.LoginTextEdit.toPlainText()
-        self.user.password = \
-            str(sha256(self.auth_window.PasswordTextEdit.toPlainText().encode('utf-8')).hexdigest())
+        self.user.password = self.encrypt(self.auth_window.PasswordTextEdit.toPlainText())
 
         assert '' not in (self.user.login, self.user.password), f'Some Field is Empty'
 
@@ -69,17 +66,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             response = self.client.login(user)['response']
             if response != 'denied':
-                self.window().show()
-                self.UserLabel.setText(response)
-                MainWindow._user = response
                 self.dialog.hide()
+
+                self.user.nickname = response
+
+                self.UserLabel.setText(response)
+                self.show()
+
                 try:
                     messages = self.all_db_messages()
-                    if list(messages.keys())[0] == 'response':
-                        if messages['response'] == 'no_messages':
-                            self.msgbox.information(self, 'Внимание', 'К сожалению, для вас пока нет сообщений.')
-                        if messages['response'] == 'dict_error':
-                            self.msgbox.critical(self, 'Ошибка', 'Ошибка сервера.')
+
                 except json.decoder.JSONDecodeError:
                     self.msgbox.critical(self, 'Ошибка', 'Некорректные данные!')
                 else:
@@ -88,7 +84,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.update_messages_widget()
             else:
                 self.msgbox.critical(self, 'Ошибка', 'Пользователь с указанными данными не зарегистрирован!')
-        except all:
+        except ConnectionError:
             raise Exception('Ошибка авторизации')
 
     def all_db_messages(self):
@@ -110,8 +106,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             registration_body = {
                 "nickname": self.auth_window.RegistTextEdit.toPlainText(),
                 "login": self.auth_window.RegistEmailTextEdit.toPlainText(),
-                "password": str(
-                    sha256(self.auth_window.RegistPasswordTextEdit.toPlainText().encode('utf-8')).hexdigest())
+                "password": self.encrypt(self.auth_window.RegistPasswordTextEdit.toPlainText())
             }
 
             assert '' not in registration_body.values(), f'Some fields is empty. {registration_body.values()}'
@@ -195,6 +190,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         else:
             self.msgbox.information(self, 'Сервер', 'Соединение установлено!')
+
+    def logout(self):
+        self.window().close()
+        self.auth_window.LoginTextEdit.clear()
+        self.auth_window.PasswordTextEdit.clear()
+        self.dialog.show()
+        self.auth_window.IPTextEdit.setFocus()
+        self.auth_window.LoginTextEdit.setFocus()
+
+    @staticmethod
+    def encrypt(string: str):
+        return sha256(string.encode('utf-8')).hexdigest()
 
 
 if __name__ == '__main__':

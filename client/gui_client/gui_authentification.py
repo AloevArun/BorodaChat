@@ -1,4 +1,5 @@
-# Form implementation generated from reading ui file 'C:\Users\Bananator\PycharmProjects\BorodaChat\client\gui_client\gui_authentification_2.ui'
+# Form implementation generated from reading ui file 'C:\Users\Bananator\PycharmProjects\BorodaChat\client\gui_client\
+# gui_authentification_2.ui'
 #
 # Created by: PyQt6 UI code generator 6.1.1
 #
