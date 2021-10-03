@@ -1,4 +1,5 @@
 import requests
+import json.decoder
 
 
 class ChatException(Exception):
@@ -52,15 +53,24 @@ class HttpClient(Host):
         body = {'login': login,
                 'password': password,
                 'time': time}
-        messages = requests.post(f'{self.base_url}/messages', json=body).json()
-        if list(messages.keys())[0] == 'response':
-            if messages['response'] == 'non_authorized':
-                raise ChatException('Некорректные данные пользователя')
-            if messages['response'] == 'dict_error':
-                raise ChatException('Ошибка данных')
-        return messages
+        try:
+            messages = requests.post(f'{self.base_url}/messages', json=body).json()
+
+            if list(messages.keys())[0] == 'response':
+
+                if messages['response'] == 'non_authorized':
+                    raise ChatException('Некорректные данные пользователя')
+
+                if messages['response'] == 'dict_error':
+                    raise ChatException('Ошибка данных')
+
+        except json.decoder.JSONDecodeError as ex:
+            return ex
+
+        else:
+            return messages
 
 
 if __name__ == '__main__':
     host = HttpClient()
-    print(host.get_messages("1", "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"))
+    print(type(host.get_messages("1", "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b")))
